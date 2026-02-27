@@ -1,0 +1,25 @@
+[project]
+name = "py1cORM"
+version = "0.0.10"
+authors = [
+  { name="Oleg Zamesov", email="o.zamesov@yandex.ru" },
+]
+dependencies = [
+  "pydantic>=2.12",
+  "requests>=2.32",
+]
+description = "ORM for 1C"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Development Status :: 4 - Beta",
+]
+
+[project.urls]
+Homepage = "https://github.com/Zamesov26/py1cORM"
+AuthorGitHub = "https://github.com/Zamesov26"

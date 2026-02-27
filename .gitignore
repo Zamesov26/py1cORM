@@ -1,0 +1,6 @@
+.venv
+.idea
+/dist/
+/src/PyOdata1C.egg-info/
+/src/test.py
+**/__pycache__/
