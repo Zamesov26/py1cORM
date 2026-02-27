@@ -9,19 +9,27 @@ class ODataFieldInfo(FieldInfo):
     def __init__(
         self,
         *,
+        alias: str | None = None,
         odata_name: str | None = None,
         auto_select: bool = True,
         auto_expand: bool = False,
         **kwargs,
     ):
+        # ВАЖНО: прокидываем alias в Pydantic
+        if alias is not None:
+            kwargs.setdefault("validation_alias", alias)
+            kwargs.setdefault("serialization_alias", alias)
+        
         super().__init__(**kwargs)
-        self.odata_name = odata_name or self.alias
+        
+        self.alias = alias
+        self.odata_name = odata_name or alias
         self.auto_select = auto_select
         self.auto_expand = auto_expand
-
-        # будет проставлено метаклассом модели:
+        
         self.model = None
         self.attr_name = None
+
 
     def bind(self, model, attr_name: str):
         self.model = model

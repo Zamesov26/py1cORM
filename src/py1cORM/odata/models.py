@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
-from py1cORM.odata.fields import FieldRef
+from py1cORM.odata.fields import FieldRef, ODataFieldInfo
+
 
 class FieldsNamespace:
     def __init__(self, model):
@@ -13,19 +14,36 @@ class FieldsNamespace:
 
 
 
+
+
 class ODataModelMeta(type(BaseModel)):
     def __new__(mcls, name, bases, namespace, **kwargs):
         cls = super().__new__(mcls, name, bases, namespace, **kwargs)
-        cls.f = FieldsNamespace(cls)
+        
+        # bind поля
+        for field_name, field in cls.__dict__.get(
+            "__pydantic_fields__", {}
+        ).items():
+            if hasattr(field, "bind"):
+                field.bind(cls, field_name)
+        
         return cls
     
     def __getattr__(cls, item):
         fields = cls.__dict__.get("__pydantic_fields__", {})
+        
         if item in fields:
-            field = fields[item]
-            return FieldRef(cls, field)
+            return fields[item].ref()
+        
         raise AttributeError(item)
 
 
+
+
 class ODataModel(BaseModel, metaclass=ODataModelMeta):
-    pass
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="ignore",
+    )
+    class Meta:
+        entity_name: str

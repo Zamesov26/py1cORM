@@ -87,7 +87,9 @@ class QuerySet:
     def filter(self, *conditions):
         for condition in conditions:
             if isinstance(condition, Expr):
-                self.spec.filter = condition.to_odata()
+                qs = self.clone()
+                qs.spec.filter = condition.to_odata()
+                return qs
             elif isinstance(condition, str):
                 self.spec.filter = condition
             else:
@@ -107,18 +109,27 @@ class QuerySet:
         return qs
 
     def _finalize_defaults(self):
-        # select defaults
+        
+        # если select не указан → авто select
         if not self._explicit_select and self.spec.select is None:
             self.spec.select = [
-                f.odata_name for f in self.model.model_fields.values()
+                f.odata_name
+                for f in self.model.model_fields.values()
                 if f.auto_select
             ]
-        # expand defaults
-        if self.spec.expand is None:
-            self.spec.expand = [
-                f.odata_name for f in self.model.model_fields.values()
-                if f.auto_expand
-            ]
+        
+        # если select указан → гарантируем pk
+        elif self._explicit_select:
+            
+            pk_name = getattr(self.model.Meta, "pk", None)
+            
+            if pk_name:
+                pk_field = self.model.model_fields[pk_name]
+                pk_odata = pk_field.odata_name
+                
+                if pk_odata not in self.spec.select:
+                    self.spec.select.append(pk_odata)
+
 
     def all(self):
         self._finalize_defaults()
