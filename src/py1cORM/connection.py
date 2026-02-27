@@ -1,11 +1,10 @@
 import requests
 from requests.auth import HTTPBasicAuth
 
-from py1cORM.odata.manager import Manager
 from py1cORM.odata.query import QuerySpec
 
 
-class ODataClient:
+class ODataConnection:
     def __init__(
         self,
         *,
@@ -13,7 +12,6 @@ class ODataClient:
         database: str,
         username: str,
         password: str,
-        models: list[type],
     ):
         self.host = host.rstrip("/")
         self.database = database
@@ -22,19 +20,6 @@ class ODataClient:
         self.base_url = (
             f"{self.host}/{self.database}/odata/standard.odata"
         )
-        
-        # регистрация моделей
-        for model in models:
-            self._register_model(model)
-    
-    # -----------------------------
-    # Регистрация модели
-    # -----------------------------
-    
-    def _register_model(self, model):
-        name = model.__name__.replace("Model", "").lower()
-        manager = Manager(self, model)
-        setattr(self, name, manager)
     
     # -----------------------------
     # Выполнение запроса
@@ -70,10 +55,6 @@ class ODataClient:
             params=params,
             auth=self.auth,
         )
-        print("params:", params)
-        print("REQUEST URL:", response.url)
-        print("STATUS:", response.status_code)
-        print("RESPONSE:", response.text)
         
         response.raise_for_status()
         

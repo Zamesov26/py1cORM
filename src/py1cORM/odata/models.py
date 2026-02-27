@@ -1,6 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from pydantic import BaseModel, ConfigDict
 
-from py1cORM.odata.fields import FieldRef, ODataFieldInfo
+from py1cORM.odata.fields import FieldRef
+from py1cORM.odata.manager import Manager
+
+if TYPE_CHECKING:
+    from py1cORM.connection import ODataConnection
 
 
 class FieldsNamespace:
@@ -11,9 +19,6 @@ class FieldsNamespace:
         field = self.model.model_fields[item]
         alias = field.alias or item
         return FieldRef(self.model, item, alias)
-
-
-
 
 
 class ODataModelMeta(type(BaseModel)):
@@ -38,12 +43,14 @@ class ODataModelMeta(type(BaseModel)):
         raise AttributeError(item)
 
 
-
-
 class ODataModel(BaseModel, metaclass=ODataModelMeta):
     model_config = ConfigDict(
         populate_by_name=True,
         extra="ignore",
     )
+    @classmethod
+    def using(cls, connection: ODataConnection):
+        return Manager(connection, cls)
+    
     class Meta:
         entity_name: str

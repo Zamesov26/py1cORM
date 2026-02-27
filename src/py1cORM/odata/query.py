@@ -1,10 +1,14 @@
-from dataclasses import dataclass
+from __future__ import annotations
 
-from py1cORM.odata.fields import FieldRef, contains
-from py1cORM.odata.serializers import serialize_value
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from py1cORM.odata.expressions import BinExpr, AndExpr, Expr, FuncExpr
+from py1cORM.odata.fields import FieldRef
 from py1cORM.odata.utils import field_to_path, order_to_odata
-from py1cORM.odata.models import ODataModel
-from py1cORM.odata.expressions import BinExpr, AndExpr, Expr, FuncExpr, RawExpr, AND
+
+if TYPE_CHECKING:
+    from py1cORM.odata.models import ODataModel
 
 LOOKUP_MAP = {
     "eq": "eq",
