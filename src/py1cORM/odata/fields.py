@@ -5,6 +5,8 @@ from py1cORM.odata.expressions import BinExpr, FuncExpr
 
 class ODataFieldInfo(FieldInfo):
     is_relation = False
+    is_embedded = False
+    is_foreign_key = False
     
     def __init__(
         self,
@@ -13,6 +15,7 @@ class ODataFieldInfo(FieldInfo):
         odata_name: str | None = None,
         auto_select: bool = True,
         auto_expand: bool = False,
+        default=None,
         **kwargs,
     ):
         # ВАЖНО: прокидываем alias в Pydantic
@@ -51,25 +54,27 @@ class ODataFieldInfo(FieldInfo):
 class ScalarField(ODataFieldInfo):
     pass
 
+
 class EmbeddedField(ODataFieldInfo):
     is_relation = True
+    is_embedded = True
     
     def __init__(self, *, model: type, **kwargs):
         super().__init__(**kwargs)
         self.embedded_model = model
-        
+    
     def get_related_model(self):
         return self.embedded_model
 
 
 class ForeignKeyField(ODataFieldInfo):
     is_relation = True
+    is_foreign_key = True
     
-    def __init__(self, *, model: type, key_name: str | None = None, **kwargs):
+    def __init__(self, *, model: type, **kwargs):
         super().__init__(**kwargs)
         self.related_model = model
-        self.key_name = key_name  # если нужно Ref_Key отдельно
-        
+    
     def get_related_model(self):
         return self.related_model
 

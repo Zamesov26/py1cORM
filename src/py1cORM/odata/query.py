@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from pydantic import create_model
+
 from py1cORM.odata.expressions import BinExpr, AndExpr, Expr, FuncExpr
 from py1cORM.odata.fields import FieldRef
 from py1cORM.odata.utils import field_to_path, order_to_odata
@@ -133,7 +135,24 @@ class QuerySet:
                 
                 if pk_odata not in self.spec.select:
                     self.spec.select.append(pk_odata)
-
+    
+    def _build_partial_model(self):
+        if not self.spec.select:
+            return self.model
+        
+        allowed_aliases = set(self.spec.select)
+        
+        partial_fields = {}
+        
+        for name, field in self.model.model_fields.items():
+            if field.alias in allowed_aliases:
+                partial_fields[name] = (field.annotation, field)
+        
+        return create_model(
+            f"{self.model.__name__}Partial",
+            __base__=self.model,
+            **partial_fields,
+        )
 
     def all(self):
         self._finalize_defaults()
