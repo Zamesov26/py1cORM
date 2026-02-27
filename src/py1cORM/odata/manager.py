@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from PyOData1C.odata.query import QuerySet
+from py1cORM.odata.query import QuerySet
 
 if TYPE_CHECKING:
     pass

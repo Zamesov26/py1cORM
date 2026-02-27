@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from PyOData1C.odata.serializers import serialize_value
+from py1cORM.odata.serializers import serialize_value
 
 if TYPE_CHECKING:
     from odata.fields import FieldRef

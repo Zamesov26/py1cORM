@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from PyOData1C.odata.fields import FieldRef, contains
-from PyOData1C.odata.serializers import serialize_value
-from PyOData1C.odata.utils import field_to_path, order_to_odata
-from PyOData1C.odata.models import ODataModel
-from PyOData1C.odata.expressions import BinExpr, AndExpr, Expr, FuncExpr, RawExpr, AND
+from py1cORM.odata.fields import FieldRef, contains
+from py1cORM.odata.serializers import serialize_value
+from py1cORM.odata.utils import field_to_path, order_to_odata
+from py1cORM.odata.models import ODataModel
+from py1cORM.odata.expressions import BinExpr, AndExpr, Expr, FuncExpr, RawExpr, AND
 
 LOOKUP_MAP = {
     "eq": "eq",

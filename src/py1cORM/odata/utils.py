@@ -1,4 +1,4 @@
-from PyOData1C.odata.fields import FieldRef, ForeignKeyField, EmbeddedField
+from py1cORM.odata.fields import FieldRef, ForeignKeyField, EmbeddedField
 
 def build_fieldref_from_string(model, field: str) -> FieldRef:
     parts = field.split("__")

@@ -1,6 +1,6 @@
 # from typing import TYPE_CHECKING
 #
-# from PyOData1C.odata.manager import Manager
+# from py1cORM.odata.manager import Manager
 # if TYPE_CHECKING:
 #     from odata.models import ODataModel
 #

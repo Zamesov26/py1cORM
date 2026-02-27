@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from PyOData1C.odata.fields import FieldRef
+from py1cORM.odata.fields import FieldRef
 
 class FieldsNamespace:
     def __init__(self, model):

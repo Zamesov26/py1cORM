@@ -1,4 +1,4 @@
-from PyOData1C.odata.query import kwargs_to_expr
+from py1cORM.odata.query import kwargs_to_expr
 from tests.models import Product
 
 

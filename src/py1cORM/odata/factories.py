@@ -1,4 +1,4 @@
-from PyOData1C.odata.fields import ScalarField, EmbeddedField, ForeignKeyField
+from py1cORM.odata.fields import ScalarField, EmbeddedField, ForeignKeyField
 
 
 def Field(*, alias=None, odata_name=None, auto_select=True, **kwargs) -> type[ScalarField]:

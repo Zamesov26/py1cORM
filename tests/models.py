@@ -1,5 +1,5 @@
-from PyOData1C.odata.factories import Field, ForeignKey
-from PyOData1C.odata.models import ODataModel
+from py1cORM.odata.factories import Field, ForeignKey
+from py1cORM.odata.models import ODataModel
 
 
 class Parent(ODataModel):

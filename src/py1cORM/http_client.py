@@ -6,7 +6,7 @@ import requests
 import requests.auth as auth
 import requests.exceptions as r_exceptions
 
-from PyOData1C.exeptions import ClientConnectionError
+from py1cORM.exeptions import ClientConnectionError
 
 @dataclass
 class Request:

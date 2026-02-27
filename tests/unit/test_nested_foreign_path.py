@@ -1,4 +1,4 @@
-from PyOData1C.odata.utils import field_to_path
+from py1cORM.odata.utils import field_to_path
 from tests.models import Product
 
 

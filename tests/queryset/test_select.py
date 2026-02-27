@@ -1,4 +1,4 @@
-from PyOData1C.odata.query import QuerySet
+from py1cORM.odata.query import QuerySet
 from tests.models import Product
 
 

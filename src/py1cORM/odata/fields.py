@@ -1,6 +1,6 @@
 from pydantic.fields import FieldInfo
 
-from PyOData1C.odata.expressions import BinExpr, FuncExpr
+from py1cORM.odata.expressions import BinExpr, FuncExpr
 
 
 class ODataFieldInfo(FieldInfo):

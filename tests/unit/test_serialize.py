@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from PyOData1C.odata.serializers import serialize_value
+from py1cORM.odata.serializers import serialize_value
 
 
 def test_serialize_string():
