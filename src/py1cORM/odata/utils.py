@@ -1,7 +1,8 @@
-from py1cORM.odata.fields import FieldRef, ForeignKeyField, EmbeddedField
+from py1cORM.odata.fields import FieldRef
+
 
 def build_fieldref_from_string(model, field: str) -> FieldRef:
-    parts = field.split("__")
+    parts = field.split('__')
     current_model = model
     fields = []
 
@@ -20,25 +21,24 @@ def build_fieldref_from_string(model, field: str) -> FieldRef:
             current_model = field_obj.get_related_model()
         else:
             if i != len(parts) - 1:
-                raise ValueError(
-                    f"Cannot traverse through scalar field '{part}'"
-                )
+                raise ValueError(f"Cannot traverse through scalar field '{part}'")
 
     return FieldRef(model, fields)
+
 
 def field_to_path(model, field):
     if isinstance(field, FieldRef):
         return field.path
-    
+
     if isinstance(field, str):
         return build_fieldref_from_string(model, field).path
-    
-    raise TypeError(f"Unsupported field type: {type(field)}")
+
+    raise TypeError(f'Unsupported field type: {type(field)}')
 
 
 def order_to_odata(model, field):
     if isinstance(field, tuple):
         name, direction = field
         path = field_to_path(model, name)
-        return f"{path} {direction}"
+        return f'{path} {direction}'
     return field_to_path(model, field)

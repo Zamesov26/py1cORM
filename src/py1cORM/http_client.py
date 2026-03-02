@@ -6,7 +6,8 @@ import requests
 import requests.auth as auth
 import requests.exceptions as r_exceptions
 
-from py1cORM.exeptions import ClientConnectionError
+from py1cORM.exceptions import ClientConnectionError
+
 
 @dataclass
 class Request:
@@ -15,14 +16,16 @@ class Request:
     query_params: dict[str, Any] | None = None
     data: dict[str, Any] | None = None
 
-class Connection:
 
-    def __init__(self,
-                 host: str,
-                 protocol: str,
-                 authentication: auth.AuthBase,
-                 connection_timeout: int | float = 10,
-                 read_timeout: int | float = 121) -> None:
+class Connection:
+    def __init__(
+        self,
+        host: str,
+        protocol: str,
+        authentication: auth.AuthBase,
+        connection_timeout: int | float = 10,
+        read_timeout: int | float = 121,
+    ) -> None:
         self.base_url = f'{protocol}://{host}/'
         self.connection_timeout = connection_timeout
         self.read_timeout = read_timeout
@@ -45,32 +48,25 @@ class Connection:
         session.headers.update(self.headers)
         return session
 
-    def get_url(self,
-                relative_url: str,
-                query_params: dict[str, Any] | None = None) -> str:
+    def get_url(
+        self, relative_url: str, query_params: dict[str, Any] | None = None
+    ) -> str:
         url = f'{self.base_url}{relative_url}'
         if query_params:
             url = f'{url}?{urlencode(query_params, quote_via=quote)}'
         return url
 
-    def send_request(self,
-                     request: Request) -> requests.Response:
-        if self._session is None:
-            session = self._create_session()
-        else:
-            session = self._session
+    def send_request(self, request: Request) -> requests.Response:
+        session = self._session or self._create_session()
         url = self.get_url(request.relative_url, request.query_params)
-        req = requests.Request(method=request.method,
-                               url=url,
-                               json=request.data)
+        req = requests.Request(method=request.method, url=url, json=request.data)
         prepared = session.prepare_request(req)
         try:
             response: requests.Response = session.send(
-                prepared,
-                timeout=(self.connection_timeout, self.read_timeout)
+                prepared, timeout=(self.connection_timeout, self.read_timeout)
             )
         except (r_exceptions.ConnectionError, r_exceptions.Timeout):
-            raise ClientConnectionError
+            raise ClientConnectionError from None
         finally:
             if self._session is None:
                 session.close()

@@ -23,3 +23,36 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/Zamesov26/py1cORM"
 AuthorGitHub = "https://github.com/Zamesov26"
+
+[tool.ruff]
+line-length = 88
+extend-exclude = [
+    "**/__pycache__/**",
+    ".venv/",
+    "venv/",
+    ".pytest_cache/",
+    ".mypy_cache/",
+    ".ruff_cache/",
+]
+
+[tool.ruff.lint]
+ignore = ["E501"]
+select = [
+    "E", # pycodestyle
+    "F", # Pyflakes
+    "UP", # pyupgrade
+    "B", # flake8-bugbear
+    "SIM", # flake8-simplify
+    "I", # isort
+    "C", # flake8-comprehensions
+]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "single"
+multiline-quotes = "double"

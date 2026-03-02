@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import create_model
 
-from py1cORM.odata.expressions import BinExpr, AndExpr, Expr, FuncExpr
+from py1cORM.odata.expressions import AndExpr, BinExpr, Expr, FuncExpr
 from py1cORM.odata.fields import FieldRef
 from py1cORM.odata.utils import field_to_path, order_to_odata
 

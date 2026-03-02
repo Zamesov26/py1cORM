@@ -1,50 +1,69 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
+
+def _serialize_none(_):
+    return 'null'
+
+
+def _serialize_bool(value: bool):
+    return 'true' if value else 'false'
+
+
+def _serialize_number(value):
+    return str(value)
+
+
+def _serialize_decimal(value: Decimal):
+    return str(value)
+
+
+def _serialize_uuid(value: UUID):
+    return f"guid'{value}'"
+
+
+def _serialize_datetime(value: datetime):
+    iso = value.replace(microsecond=0).isoformat()
+    return f"datetime'{iso}'"
+
+
+def _serialize_date(value: date):
+    return f"date'{value.isoformat()}'"
+
+
+def _serialize_str(value: str):
+    escaped = value.replace("'", "''")
+    return f"'{escaped}'"
+
+
+def _serialize_collection(value):
+    serialized = ', '.join(serialize_value(v) for v in value)
+    return f'({serialized})'
+
+
+_TYPE_SERIALIZERS = {
+    type(None): _serialize_none,
+    bool: _serialize_bool,
+    int: _serialize_number,
+    float: _serialize_number,
+    Decimal: _serialize_decimal,
+    UUID: _serialize_uuid,
+    datetime: _serialize_datetime,
+    date: _serialize_date,
+    str: _serialize_str,
+}
+
+
 def serialize_value(value):
-    # выражения
-    if hasattr(value, "to_odata"):
+    if hasattr(value, 'to_odata'):
         return value.to_odata()
-    
-    # None
-    if value is None:
-        return "null"
-    
-    # bool
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    
-    # int / float
-    if isinstance(value, (int, float)):
-        return str(value)
-    
-    # Decimal
-    if isinstance(value, Decimal):
-        return str(value)
-    
-    # UUID
-    if isinstance(value, UUID):
-        return f"guid'{value}'"
-    
-    # datetime
-    if isinstance(value, datetime):
-        # ISO без микросекунд
-        iso = value.replace(microsecond=0).isoformat()
-        return f"datetime'{iso}'"
-    
-    # date
-    if isinstance(value, date):
-        return f"date'{value.isoformat()}'"
-    
-    # str
-    if isinstance(value, str):
-        escaped = value.replace("'", "''")
-        return f"'{escaped}'"
-    
-    # список (например future IN)
+
     if isinstance(value, (list, tuple, set)):
-        serialized = ", ".join(serialize_value(v) for v in value)
-        return f"({serialized})"
-    
-    raise TypeError(f"Unsupported type for OData serialization: {type(value)}")
+        return _serialize_collection(value)
+
+    serializer = _TYPE_SERIALIZERS.get(type(value))
+    if serializer:
+        return serializer(value)
+
+    raise TypeError(f'Unsupported type for OData serialization: {type(value)}')

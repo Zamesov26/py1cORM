@@ -9,11 +9,11 @@ class DummyClient:
 
 def test_filter_expr():
     qs = QuerySet(DummyClient(), Product)
-    qs = qs.filter(Product.category.parent.name=="X")
+    qs = qs.filter(Product.category.parent.name == 'X')
     qs._finalize_defaults()
-    
+
     assert qs.spec.filter == "Category/Parent/Name eq 'X'"
-    
+
 
 def test_filter_raw_string():
     qs = QuerySet(DummyClient(), Product)

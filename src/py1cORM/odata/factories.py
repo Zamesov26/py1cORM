@@ -1,4 +1,4 @@
-from py1cORM.odata.fields import ScalarField, EmbeddedField, ForeignKeyField
+from py1cORM.odata.fields import EmbeddedField, ForeignKeyField, ScalarField
 
 
 def Field(*, alias=None, odata_name=None, auto_select=True, default=None, **kwargs):
@@ -7,21 +7,13 @@ def Field(*, alias=None, odata_name=None, auto_select=True, default=None, **kwar
         odata_name=odata_name,
         auto_select=auto_select,
         default=default,
-        **kwargs
+        **kwargs,
     )
+
 
 def Embedded(*, model, alias=None, default=None, **kwargs):
-    return EmbeddedField(
-        model=model,
-        alias=alias,
-        default=default,
-        **kwargs
-    )
+    return EmbeddedField(model=model, alias=alias, default=default, **kwargs)
+
 
 def ForeignKey(*, model, alias=None, default=None, **kwargs):
-    return ForeignKeyField(
-        model=model,
-        alias=alias,
-        default=default,
-        **kwargs
-    )
+    return ForeignKeyField(model=model, alias=alias, default=default, **kwargs)

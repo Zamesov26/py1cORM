@@ -3,4 +3,4 @@ from tests.models import Product
 
 
 def test_deep_foreign_path():
-    assert field_to_path(Product, "category__parent__name") == "Category/Parent/Name"
+    assert field_to_path(Product, 'category__parent__name') == 'Category/Parent/Name'
