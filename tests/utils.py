@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from odata.query import QuerySpec
+    from py1cORM.odata.query import QuerySpec
 
 
 def build_query_params(spec: 'QuerySpec') -> dict:

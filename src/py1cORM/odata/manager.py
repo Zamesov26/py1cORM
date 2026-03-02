@@ -1,9 +1,4 @@
-from typing import TYPE_CHECKING
-
 from py1cORM.odata.query import QuerySet
-
-if TYPE_CHECKING:
-    pass
 
 
 class Manager:

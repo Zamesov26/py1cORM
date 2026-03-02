@@ -1,4 +1,4 @@
-from py1cORM.odata.expressions import BinExpr, FuncExpr
+from py1cORM.odata.expressions import BinExpr, FuncExpr, InExpr
 
 
 class FieldRef:
@@ -19,6 +19,14 @@ class FieldRef:
         return '/'.join(f.odata_name for f in self.fields)
 
     def __getattr__(self, item):
+        # --- операции над полем ---
+        if item == 'contains':
+            return lambda value: FuncExpr('contains', self, value)
+
+        if item == 'in_':
+            return lambda values: InExpr(self, values)
+
+        # --- переход по relation ---
         field = self.field
 
         if not field.is_relation:

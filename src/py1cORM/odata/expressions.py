@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from py1cORM.odata.serializers import serialize_value
 
 if TYPE_CHECKING:
-    from odata.fields import FieldRef
+    from py1cORM.odata.fields import FieldRef
 
 
 class Expr:
@@ -31,8 +31,12 @@ class BinExpr(Expr):
     def __init__(self, left: 'FieldRef', op: str, right):
         self.left, self.op, self.right = left, op, right
 
-    def to_odata(self) -> str:
-        return f'{self.left.path} {self.op} {serialize_value(self.right)}'
+    def to_odata(self):
+        right = serialize_value(
+            self.right,
+            expected_type=self.left.field.annotation,
+        )
+        return f'{self.left.path} {self.op} {right}'
 
 
 class FuncExpr:
@@ -42,7 +46,14 @@ class FuncExpr:
         self.value = value
 
     def to_odata(self):
-        return f'{self.func_name}({self.field_ref.path}, {serialize_value(self.value)})'
+        expected_type = self.field_ref.field.annotation
+
+        serialized_value = serialize_value(
+            self.value,
+            expected_type=expected_type,
+        )
+
+        return f'{self.func_name}({self.field_ref.path}, {serialized_value})'
 
 
 class RawExpr:
@@ -51,6 +62,19 @@ class RawExpr:
 
     def to_odata(self):
         return self.raw
+
+
+class InExpr:
+    def __init__(self, field_ref, values):
+        self.field_ref = field_ref
+        self.values = values
+
+    def to_odata(self):
+        serialized = serialize_value(
+            self.values,
+            expected_type=self.field_ref.field.annotation,
+        )
+        return f'{self.field_ref.path} in {serialized}'
 
 
 def AND(*items):
