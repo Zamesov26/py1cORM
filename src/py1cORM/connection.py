@@ -1,3 +1,5 @@
+from urllib.parse import quote, urlencode
+
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -48,9 +50,9 @@ class ODataConnection:
 
         params['$format'] = 'json'
 
+        query_string = urlencode(params, quote_via=quote)
         response = requests.get(
-            url,
-            params=params,
+            f'{url}?{query_string}',
             auth=self.auth,
         )
 
