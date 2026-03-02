@@ -37,9 +37,9 @@ def _serialize_str(value: str):
     return f"'{escaped}'"
 
 
-def _serialize_collection(value):
-    serialized = ', '.join(serialize_value(v) for v in value)
-    return f'({serialized})'
+def _serialize_collection(values, expected_type=None):
+    serialized = [serialize_value(v, expected_type) for v in values]
+    return f'({", ".join(serialized)})'
 
 
 _TYPE_SERIALIZERS = {
@@ -55,12 +55,31 @@ _TYPE_SERIALIZERS = {
 }
 
 
-def serialize_value(value):
+def serialize_value(value, expected_type=None):
+    # выражения (вложенные Expr)
     if hasattr(value, 'to_odata'):
         return value.to_odata()
 
+    # коллекции
     if isinstance(value, (list, tuple, set)):
-        return _serialize_collection(value)
+        return _serialize_collection(value, expected_type)
+
+    # -------------------------
+    # Тип поля важнее типа значения
+    # -------------------------
+
+    if expected_type is UUID:
+        if value is None:
+            return 'null'
+
+        if isinstance(value, str):
+            value = UUID(value)
+
+        return f"guid'{value}'"
+
+    # -------------------------
+    # Обычная сериализация
+    # -------------------------
 
     serializer = _TYPE_SERIALIZERS.get(type(value))
     if serializer:
