@@ -1,86 +1,10 @@
-from pydantic.fields import FieldInfo
-
 from py1cORM.odata.expressions import BinExpr, FuncExpr
-
-
-class ODataFieldInfo(FieldInfo):
-    is_relation = False
-    is_embedded = False
-    is_foreign_key = False
-
-    def __init__(
-        self,
-        *,
-        alias: str | None = None,
-        odata_name: str | None = None,
-        auto_select: bool = True,
-        auto_expand: bool = False,
-        default=None,
-        **kwargs,
-    ):
-        # ВАЖНО: прокидываем alias в Pydantic
-        if alias is not None:
-            kwargs.setdefault('validation_alias', alias)
-            kwargs.setdefault('serialization_alias', alias)
-
-        super().__init__(**kwargs)
-
-        self.alias = alias
-        self.odata_name = odata_name or alias
-        self.auto_select = auto_select
-        self.auto_expand = auto_expand
-
-        self.model = None
-        self.attr_name = None
-
-    def bind(self, model, attr_name: str):
-        self.model = model
-        self.attr_name = attr_name
-        if not self.odata_name:
-            self.odata_name = self.alias or attr_name
-        return self
-
-    # ссылка на поле для DSL
-    def ref(self):
-        return FieldRef(self.model, self)
-
-    def get_related_model(self):
-        raise AttributeError(f"Field '{self.attr_name}' is not a relation")
-
-
-class ScalarField(ODataFieldInfo):
-    pass
-
-
-class EmbeddedField(ODataFieldInfo):
-    is_relation = True
-    is_embedded = True
-
-    def __init__(self, *, model: type, **kwargs):
-        super().__init__(**kwargs)
-        self.embedded_model = model
-
-    def get_related_model(self):
-        return self.embedded_model
-
-
-class ForeignKeyField(ODataFieldInfo):
-    is_relation = True
-    is_foreign_key = True
-
-    def __init__(self, *, model: type, **kwargs):
-        super().__init__(**kwargs)
-        self.related_model = model
-
-    def get_related_model(self):
-        return self.related_model
 
 
 class FieldRef:
     def __init__(self, model, field_or_fields):
         self.model = model
 
-        # если передали один field — превращаем в список
         if isinstance(field_or_fields, list):
             self.fields = field_or_fields
         else:
@@ -102,7 +26,7 @@ class FieldRef:
 
         target_model = field.get_related_model()
 
-        next_field = target_model.model_fields.get(item)
+        next_field = target_model._fields.get(item)
         if not next_field:
             raise AttributeError(f'{item} not found in {target_model.__name__}')
 

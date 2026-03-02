@@ -7,7 +7,7 @@ def build_fieldref_from_string(model, field: str) -> FieldRef:
     fields = []
 
     for i, part in enumerate(parts):
-        model_fields = current_model.model_fields
+        model_fields = current_model._fields
 
         if part not in model_fields:
             raise ValueError(

@@ -5,7 +5,6 @@ authors = [
   { name="Oleg Zamesov", email="o.zamesov@yandex.ru" },
 ]
 dependencies = [
-  "pydantic>=2.12",
   "requests>=2.32",
 ]
 description = "ORM for 1C"

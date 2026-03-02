@@ -15,17 +15,19 @@ class Entity:
 
         for field_name, field in model_cls._fields.items():
             # -------------------------
-            # 1️⃣ ForeignKey
+            # ForeignKey
             # -------------------------
             if isinstance(field, ForeignKey):
                 key_raw = raw.get(field.key_field)
-                key_value = convert(key_raw, UUID) if key_raw else None
+
+                key_value = None
+                if key_raw:
+                    key_value = convert(key_raw, UUID)
 
                 entity_value = None
                 if field.alias in raw and isinstance(raw[field.alias], dict):
-                    entity_value = field.model.from_raw(raw[field.alias])
+                    entity_value = field.related_model.from_raw(raw[field.alias])
 
-                # если нет ни key ни expand → NotLoaded
                 if key_raw is None and field.alias not in raw:
                     object.__setattr__(self, field_name, NotLoaded)
                     continue
@@ -37,7 +39,7 @@ class Entity:
                 continue
 
             # -------------------------
-            # 2️⃣ Обычные поля
+            # Обычные поля
             # -------------------------
             alias = field.alias
 

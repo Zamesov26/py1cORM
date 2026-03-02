@@ -1,24 +1,25 @@
 import os
-
-from pydantic import UUID1
+from uuid import UUID
 
 from py1cORM.connection import ODataConnection
-from py1cORM.odata.factories import Embedded, Field, ForeignKey
-from py1cORM.odata.models import ODataModel
+from py1cORM.models.base import ODataModel
+from py1cORM.models.fields import Embedded, Field, ForeignKey
 
 # -------------------------------
-# 1. Описание модели
+# 1. Описание моделей
 # -------------------------------
 
 
 class WorkCenterModel(ODataModel):
-    uid: str = Field(alias='ВидРабочегоЦентра_Key')
+    uid: UUID | None = Field(alias='ВидРабочегоЦентра_Key')
+    name: str = Field(alias='Description')
 
 
 class ProductStageModel(ODataModel):
-    owner_id: str = Field(alias='Owner_Key')
+    owner_id: UUID | None = Field(alias='Owner_Key')
     work_centers: list[WorkCenterModel] = Embedded(
-        model=WorkCenterModel, alias='ВидыРабочихЦентров'
+        model=WorkCenterModel,
+        alias='ВидыРабочихЦентров',
     )
 
     class Meta:
@@ -26,21 +27,28 @@ class ProductStageModel(ODataModel):
 
 
 class ProductionModel(ODataModel):
-    uid: str = Field(alias='Ref_Key')
-    nomenclature_key: str = Field(alias='Номенклатура_Key')
+    uid: UUID | None = Field(alias='Ref_Key')
+    nomenclature_key: UUID | None = Field(alias='Номенклатура_Key')
 
 
 class ResourceSpecificationsModel(ODataModel):
-    uid_1c: UUID1 = Field(alias='Ref_Key')
+    uid_1c: UUID | None = Field(alias='Ref_Key')
     name: str = Field(alias='Description')
+
     productions: list[ProductionModel] = Embedded(
-        model=ProductionModel, alias='ВыходныеИзделия'
+        model=ProductionModel,
+        alias='ВыходныеИзделия',
     )
+
     input_productions: list[ProductionModel] = Embedded(
-        model=ProductionModel, alias='МатериалыИУслуги'
+        model=ProductionModel,
+        alias='МатериалыИУслуги',
     )
-    product_stage: ProductStageModel = ForeignKey(
-        model=ProductStageModel, alias='ОсновноеИзделиеЭтап'
+
+    product_stage: ProductStageModel | None = ForeignKey(
+        model=ProductStageModel,
+        alias='ОсновноеИзделиеЭтап',
+        key_field='ОсновноеИзделиеЭтап_Key',
     )
 
     class Meta:
@@ -48,7 +56,7 @@ class ResourceSpecificationsModel(ODataModel):
 
 
 # -------------------------------
-# 1. Создание коннектора
+# 2. Создание коннектора
 # -------------------------------
 
 conn = ODataConnection(
@@ -62,8 +70,27 @@ conn = ODataConnection(
 # 3. Использование
 # -------------------------------
 
-nomenclature = ResourceSpecificationsModel.using(conn)
+specs = ResourceSpecificationsModel.using(conn)
 
-items = nomenclature.select(ResourceSpecificationsModel.name).all()
+# 🔹 Простой select
+items = specs.select(ResourceSpecificationsModel.name).paginate(top=5).all()
+
 for item in items:
-    print(item)
+    print('Name:', item.name)
+    print('Extra:', item.extra())
+    print('-----')
+
+
+# 🔹 Пример с expand
+items_with_stage = (
+    specs.expand(ResourceSpecificationsModel.product_stage).paginate(top=3).all()
+)
+
+for item in items_with_stage:
+    if item.is_loaded('product_stage'):
+        fk = item.product_stage
+        print('Stage key:', fk.key)
+
+        if fk.entity:
+            print('Owner:', fk.entity.owner_id)
+            print('Work centers:', len(fk.entity.work_centers))
