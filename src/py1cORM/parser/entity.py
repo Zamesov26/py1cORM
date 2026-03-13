@@ -46,9 +46,16 @@ class Entity:
             if alias in raw:
                 raw_value = raw[alias]
                 value = convert(raw_value, field.annotation)
+
                 object.__setattr__(self, field_name, value)
                 self._loaded_fields.add(field_name)
+
             else:
+                # expand_only поле может отсутствовать
+                if getattr(field, 'expand_only', False):
+                    object.__setattr__(self, field_name, NotLoaded)
+                    continue
+
                 object.__setattr__(self, field_name, NotLoaded)
 
         for key, value in raw.items():

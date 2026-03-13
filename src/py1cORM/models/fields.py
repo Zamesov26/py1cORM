@@ -46,9 +46,10 @@ class Embedded(Field):
     is_relation = True
     is_embedded = True
 
-    def __init__(self, *, model: type, **kwargs):
+    def __init__(self, *, model: type, expand_only=False, **kwargs):
         super().__init__(**kwargs)
         self.embedded_model = model
+        self.expand_only = expand_only
 
     def get_related_model(self):
         return self.embedded_model
