@@ -24,6 +24,9 @@ def _serialize_uuid(value: UUID):
 
 
 def _serialize_datetime(value: datetime):
+    if value.tzinfo is not None:
+        value = value.replace(tzinfo=None)
+
     iso = value.replace(microsecond=0).isoformat()
     return f"datetime'{iso}'"
 

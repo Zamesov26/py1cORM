@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID
 
@@ -34,6 +34,13 @@ def test_serialize_uuid():
 def test_serialize_datetime():
     dt = datetime(2024, 1, 1, 10, 0, 0)
     assert serialize_value(dt) == "datetime'2024-01-01T10:00:00'"
+    
+def test_datetime_serialization_removes_timezone():
+    dt = datetime(2026, 2, 28, 15, 58, 39, tzinfo=UTC)
+
+    result = serialize_value(dt)
+
+    assert result == "datetime'2026-02-28T15:58:39'"
 
 
 def test_serialize_decimal():

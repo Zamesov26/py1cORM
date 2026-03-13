@@ -1,7 +1,6 @@
 from py1cORM.models.base import ODataModel
 from py1cORM.models.fields import Field
 
-
 # -----------------------------
 # 1 Дефолтное поведение
 # -----------------------------
