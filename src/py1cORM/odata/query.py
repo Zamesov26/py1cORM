@@ -135,6 +135,19 @@ class QuerySet:
         self._finalize_defaults()
         data = self.client.get_collection(self.model.Meta.entity_name, self.spec)
         return [self.model.from_raw(item) for item in data]
+    
+    def iterator(self, batch_size: int=100):
+        skip = 0
+        
+        while True:
+            batch = self.paginate(top=batch_size, skip=skip).all()
+            if not batch:
+                break
+            
+            for item in batch:
+                yield item
+            
+            skip += batch_size
 
     def get(self, **kwargs):
         # kwargs можно конвертировать в AND(...) автоматически
