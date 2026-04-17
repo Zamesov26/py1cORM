@@ -27,8 +27,8 @@ def test_fk_only_key():
 
     entity = ResourceSpecificationsModel.from_raw(raw)
 
-    assert entity.product_stage.key is not None
-    assert entity.product_stage.entity is None
+    assert entity.product_stage._id is not None
+    assert entity.product_stage._entity is None
 
 
 def test_fk_with_expand():
@@ -42,8 +42,8 @@ def test_fk_with_expand():
 
     entity = ResourceSpecificationsModel.from_raw(raw)
 
-    assert entity.product_stage.key is not None
-    assert entity.product_stage.entity is not None
+    assert entity.product_stage._id is not None
+    assert entity.product_stage._entity is not None
 
 
 def test_fk_not_loaded():
