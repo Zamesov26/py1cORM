@@ -63,7 +63,7 @@ class FieldRef:
 
 
 def like(field: FieldRef, pattern: str):
-    return BinExpr(field, 'like', pattern)
+    return FuncExpr('like', field, pattern)
 
 
 def contains(field: FieldRef, value: str):

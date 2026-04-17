@@ -39,7 +39,7 @@ class BinExpr(Expr):
         return f'{self.left.path} {self.op} {right}'
 
 
-class FuncExpr:
+class FuncExpr(Expr):
     def __init__(self, func_name, field_ref, value):
         self.func_name = func_name
         self.field_ref = field_ref
