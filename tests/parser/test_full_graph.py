@@ -67,10 +67,10 @@ def test_full_graph_parsing():
     assert entity.extra() == {'ExtraRootField': 123}
 
     # --- FK key
-    assert entity.product_stage._id == UUID('550e8400-e29b-41d4-a716-446655440000')
+    assert entity.product_stage.id == UUID('550e8400-e29b-41d4-a716-446655440000')
 
     # --- FK expand
-    stage = entity.product_stage._entity
+    stage = entity.product_stage
     assert stage.owner_id == UUID('11111111-1111-1111-1111-111111111111')
 
     # --- nested list

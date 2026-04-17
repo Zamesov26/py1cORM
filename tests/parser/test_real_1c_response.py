@@ -117,7 +117,7 @@ def test_real_1c_response_parsing():
     assert input_prod.nomenclature_key == UUID('9de0ad04-a5e7-11ec-aa3b-ac1f6bd30991')
 
     # --- ForeignKey key
-    assert spec.product_stage._id == UUID('a93d6b5d-c75f-11ed-aa56-ac1f6bd30991')
+    assert spec.product_stage.id == UUID('a93d6b5d-c75f-11ed-aa56-ac1f6bd30991')
 
     # --- ForeignKey expand
     stage = spec.product_stage._entity
