@@ -70,7 +70,8 @@ class QuerySpec:
     count: bool | None = None
 
 
-T = TypeVar("T", bound="ODataModel")
+T = TypeVar('T', bound='ODataModel')
+
 
 class QuerySet[T]:
     def __init__(self, client, model: type[T], spec: QuerySpec | None = None):
@@ -94,6 +95,8 @@ class QuerySet[T]:
         return qs
 
     # TODO: проверить возможно тут не правильная логика
+    # NB: Подразумевается, что все фильтры образуют один объект(вложены друг в друга)
+    # TODO: нужно объединить их всех с помощью AND
     def filter(self, *conditions) -> QuerySet[T]:
         for condition in conditions:
             if isinstance(condition, Expr):
@@ -111,7 +114,9 @@ class QuerySet[T]:
         qs.spec.orderby = [order_to_odata(self.model, f) for f in fields]
         return qs
 
-    def paginate(self, *, top: int | None = None, skip: int | None = None) -> QuerySet[T]:
+    def paginate(
+        self, *, top: int | None = None, skip: int | None = None
+    ) -> QuerySet[T]:
         qs = self.clone()
         qs.spec.top = top
         qs.spec.skip = skip
