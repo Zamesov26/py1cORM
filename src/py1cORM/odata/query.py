@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from py1cORM.odata.expressions import AndExpr, BinExpr, Expr, FuncExpr
 from py1cORM.odata.fields import FieldRef
@@ -69,14 +70,16 @@ class QuerySpec:
     count: bool | None = None
 
 
-class QuerySet:
-    def __init__(self, client, model: type[ODataModel], spec: QuerySpec | None = None):
+T = TypeVar("T", bound="ODataModel")
+
+class QuerySet[T]:
+    def __init__(self, client, model: type[T], spec: QuerySpec | None = None):
         self.client = client
         self.model = model
         self.spec = spec or QuerySpec()
         self._explicit_select = False
 
-    def clone(self):
+    def clone(self) -> QuerySet[T]:
         return QuerySet(self.client, self.model, QuerySpec(**vars(self.spec)))
 
     def select(self, *fields):
@@ -85,12 +88,13 @@ class QuerySet:
         qs.spec.select = [field_to_path(self.model, f) for f in fields]
         return qs
 
-    def expand(self, *fields):
+    def expand(self, *fields) -> QuerySet[T]:
         qs = self.clone()
         qs.spec.expand = [field_to_path(self.model, f) for f in fields]
         return qs
 
-    def filter(self, *conditions):
+    # TODO: проверить возможно тут не правильная логика
+    def filter(self, *conditions) -> QuerySet[T]:
         for condition in conditions:
             if isinstance(condition, Expr):
                 qs = self.clone()
@@ -102,26 +106,27 @@ class QuerySet:
                 raise TypeError('Unsupported filter argument')
         return self
 
-    def order_by(self, *fields):
+    def order_by(self, *fields) -> QuerySet[T]:
         qs = self.clone()
         qs.spec.orderby = [order_to_odata(self.model, f) for f in fields]
         return qs
 
-    def paginate(self, *, top: int | None = None, skip: int | None = None):
+    def paginate(self, *, top: int | None = None, skip: int | None = None) -> QuerySet[T]:
         qs = self.clone()
         qs.spec.top = top
         qs.spec.skip = skip
         return qs
 
     def _finalize_defaults(self):
-        # если select не указан → авто select
+        # TODO если select не указан грузим все поля(не указываем select)
+        # TODO: возможно нужно подумать над какой-то надстрой типа only_model_fields
         if not self._explicit_select and self.spec.select is None:
             self.spec.select = [
                 f.odata_name for f in self.model._fields.values() if f.auto_select
             ]
 
         # если select указан → гарантируем pk
-        elif self._explicit_select:
+        if self._explicit_select:
             pk_name = getattr(self.model.Meta, 'pk', None)
 
             if pk_name:
@@ -131,12 +136,12 @@ class QuerySet:
                 if pk_odata not in self.spec.select:
                     self.spec.select.append(pk_odata)
 
-    def all(self):
+    def all(self) -> list[T]:
         self._finalize_defaults()
         data = self.client.get_collection(self.model.Meta.entity_name, self.spec)
         return [self.model.from_raw(item) for item in data]
 
-    def batched(self, batch_size: int = 100):
+    def batched(self, batch_size: int = 100) -> Iterable[list[T]]:
         skip = 0
 
         while True:
@@ -147,7 +152,7 @@ class QuerySet:
             yield batch
             skip += batch_size
 
-    def get(self, **kwargs):
+    def get(self, **kwargs) -> T:
         # kwargs можно конвертировать в AND(...) автоматически
         expr = kwargs_to_expr(self.model, kwargs)
         items = self.filter(expr).paginate(top=2).all()
