@@ -89,8 +89,8 @@ items_with_stage = (
 for item in items_with_stage:
     if item.is_loaded('product_stage'):
         fk = item.product_stage
-        print('Stage key:', fk._id)
+        print('Stage key:', fk.id)
 
-        if fk._entity:
-            print('Owner:', fk._entity.owner_id)
-            print('Work centers:', len(fk._entity.work_centers))
+        if fk.is_loaded():
+            print('Owner:', fk.owner_id)
+            print('Work centers:', len(fk.work_centers))
