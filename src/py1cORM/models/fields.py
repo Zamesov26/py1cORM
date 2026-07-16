@@ -43,7 +43,9 @@ class Field:
 
 
 class Embedded(Field):
-    """По умолчанию встроенная структура"""
+    """Встроенная структура
+    По умолчанию встроенная структура
+    """
     
     is_relation = True
     is_embedded = True
