@@ -43,6 +43,8 @@ class Field:
 
 
 class Embedded(Field):
+    """По умолчанию встроенная структура"""
+    
     is_relation = True
     is_embedded = True
 
@@ -56,6 +58,11 @@ class Embedded(Field):
 
 
 class ForeignKey(Field):
+    """Связное поле
+    По умолчанию есть только uid,
+    поддерживает expand,
+    можно получить полноценную запись в другой таблице
+    """
     is_relation = True
     is_foreign_key = True
 
