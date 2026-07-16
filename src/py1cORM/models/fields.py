@@ -11,13 +11,11 @@ class Field:
         *,
         alias: str | None = None,
         odata_name: str | None = None,
-        auto_select: bool = True,
         auto_expand: bool = False,
         default=None,
     ):
         self.alias = alias
         self.odata_name = odata_name or alias
-        self.auto_select = auto_select
         self.auto_expand = auto_expand
         self.default = default
 
@@ -40,6 +38,24 @@ class Field:
 
     def get_related_model(self):
         raise AttributeError(f"Field '{self.attr_name}' is not a relation")
+    
+    
+class TypedGuid(Field):
+
+    def __init__(
+        self,
+        *,
+        entity_type,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.entity_type = entity_type
+
+    def serialize_filter(self, value):
+        return (
+            f"cast(guid'{value}', "
+            f"'{self.entity_type}')"
+        )
 
 
 class Embedded(Field):
@@ -72,6 +88,26 @@ class ForeignKey(Field):
         super().__init__(**kwargs)
         self.related_model = model
         self.key_field = key_field
+
+    def get_related_model(self):
+        return self.related_model
+    
+    
+class Navigation(Field):
+    """
+    Навигационное свойство OData.
+
+    Не имеет собственного GUID.
+    Может быть загружено через $expand
+    или по navigationLinkUrl.
+    """
+
+    is_relation = True
+    is_navigation = True
+
+    def __init__(self, *, model: type, **kwargs):
+        super().__init__(**kwargs)
+        self.related_model = model
 
     def get_related_model(self):
         return self.related_model

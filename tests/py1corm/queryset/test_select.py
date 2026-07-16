@@ -7,7 +7,7 @@ class DummyClient:
         return []
 
 
-def test_without_auto_select_fields():
+def test_without_select_fields():
     qs = QuerySet(DummyClient(), Product)
     qs._finalize_defaults()
 
