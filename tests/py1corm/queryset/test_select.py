@@ -7,12 +7,11 @@ class DummyClient:
         return []
 
 
-def test_auto_select_fields():
+def test_without_auto_select_fields():
     qs = QuerySet(DummyClient(), Product)
     qs._finalize_defaults()
 
-    assert 'Description' in qs.spec.select
-    # category по умолчанию тоже auto_select=True если так настроено
+    assert qs.spec.select is None
 
 
 def test_explicit_select_override():

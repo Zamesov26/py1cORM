@@ -78,14 +78,12 @@ class QuerySet[T]:
         self.client = client
         self.model = model
         self.spec = spec or QuerySpec()
-        self._explicit_select = False
 
     def clone(self) -> QuerySet[T]:
         return QuerySet(self.client, self.model, QuerySpec(**vars(self.spec)))
 
     def select(self, *fields):
         qs = self.clone()
-        qs._explicit_select = True
         qs.spec.select = [field_to_path(self.model, f) for f in fields]
         return qs
 
@@ -121,23 +119,15 @@ class QuerySet[T]:
         qs.spec.top = top
         qs.spec.skip = skip
         return qs
-
+    
     def _finalize_defaults(self):
-        # TODO если select не указан грузим все поля(не указываем select)
-        # TODO: возможно нужно подумать над какой-то надстрой типа only_model_fields
-        if not self._explicit_select and self.spec.select is None:
-            self.spec.select = [
-                f.odata_name for f in self.model._fields.values() if f.auto_select
-            ]
-
-        # если select указан → гарантируем pk
-        if self._explicit_select:
+        if self.spec.select is not None:
             pk_name = getattr(self.model.Meta, 'pk', None)
-
+            
             if pk_name:
                 pk_field = self.model._fields[pk_name]
                 pk_odata = pk_field.odata_name
-
+                
                 if pk_odata not in self.spec.select:
                     self.spec.select.append(pk_odata)
 

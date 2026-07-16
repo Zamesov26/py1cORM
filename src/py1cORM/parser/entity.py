@@ -83,10 +83,10 @@ class Entity:
         return self._model.__str__(self)
 
     def _safe_repr(self, value):
-        text = repr(value)
-        if len(text) > 80:
-            return text[:77] + '...'
-        return text
+        try:
+            return repr(value)
+        except Exception as exc:
+            return f'<repr failed: {type(exc).__name__}: {exc}>'
 
     def __repr__(self):
         model = self._model
