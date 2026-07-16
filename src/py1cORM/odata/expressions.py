@@ -34,7 +34,7 @@ class BinExpr(Expr):
     def to_odata(self):
         right = serialize_value(
             self.right,
-            expected_type=self.left.field.annotation,
+            field=self.left.field
         )
         return f'{self.left.path} {self.op} {right}'
 
@@ -46,11 +46,9 @@ class FuncExpr(Expr):
         self.value = value
 
     def to_odata(self):
-        expected_type = self.field_ref.field.annotation
-
         serialized_value = serialize_value(
             self.value,
-            expected_type=expected_type,
+            field=self.field_ref.field,
         )
 
         return f'{self.func_name}({self.field_ref.path}, {serialized_value})'
@@ -72,7 +70,7 @@ class InExpr:
     def to_odata(self):
         serialized = serialize_value(
             self.values,
-            expected_type=self.field_ref.field.annotation,
+            field=self.field_ref.field,
         )
         return f'{self.field_ref.path} in {serialized}'
 

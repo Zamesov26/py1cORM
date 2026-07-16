@@ -12,8 +12,11 @@ class Field:
         alias: str | None = None,
         odata_name: str | None = None,
         auto_expand: bool = False,
+        entity_type: str | None = None,
         default=None,
     ):
+        
+        self.entity_type = entity_type
         self.alias = alias
         self.odata_name = odata_name or alias
         self.auto_expand = auto_expand
