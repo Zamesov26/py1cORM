@@ -153,12 +153,17 @@ class QuerySet[T]:
             yield batch
             skip += batch_size
 
-    def get(self, **kwargs) -> T:
-        # kwargs можно конвертировать в AND(...) автоматически
-        expr = kwargs_to_expr(self.model, kwargs)
-        items = self.filter(expr).paginate(top=2).all()
+    def get(self, **kwargs):
+        qs = self
+
+        if kwargs:
+            qs = qs.filter(kwargs_to_expr(self.model, kwargs))
+
+        items = qs.paginate(top=2).all()
+
         if not items:
             raise LookupError('Not found')
         if len(items) > 1:
             raise LookupError('Multiple objects')
+
         return items[0]
