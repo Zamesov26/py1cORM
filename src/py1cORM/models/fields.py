@@ -1,7 +1,11 @@
+from typing import Generic, TypeVar
+
 from py1cORM.odata.fields import FieldRef
 
+T = TypeVar('T')
 
-class Field:
+
+class Field[T]:
     is_relation = False
     is_embedded = False
     is_foreign_key = False
@@ -15,7 +19,7 @@ class Field:
         entity_type: str | None = None,
         default=None,
     ):
-        
+
         self.entity_type = entity_type
         self.alias = alias
         self.odata_name = odata_name or alias
@@ -36,15 +40,14 @@ class Field:
 
         return self
 
-    def ref(self):
+    def ref(self) -> Generic[T]:
         return FieldRef(self.model, self)
 
     def get_related_model(self):
         raise AttributeError(f"Field '{self.attr_name}' is not a relation")
-    
-    
-class TypedGuid(Field):
 
+
+class TypedGuid(Field):
     def __init__(
         self,
         *,
@@ -55,17 +58,14 @@ class TypedGuid(Field):
         self.entity_type = entity_type
 
     def serialize_filter(self, value):
-        return (
-            f"cast(guid'{value}', "
-            f"'{self.entity_type}')"
-        )
+        return f"cast(guid'{value}', '{self.entity_type}')"
 
 
 class Embedded(Field):
     """Встроенная структура
     По умолчанию встроенная структура
     """
-    
+
     is_relation = True
     is_embedded = True
 
@@ -84,6 +84,7 @@ class ForeignKey(Field):
     поддерживает expand,
     можно получить полноценную запись в другой таблице
     """
+
     is_relation = True
     is_foreign_key = True
 
@@ -94,8 +95,8 @@ class ForeignKey(Field):
 
     def get_related_model(self):
         return self.related_model
-    
-    
+
+
 class Navigation(Field):
     """
     Навигационное свойство OData.

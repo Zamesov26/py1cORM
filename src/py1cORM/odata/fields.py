@@ -1,7 +1,12 @@
+from collections.abc import Iterable
+from typing import TypeVar
+
 from py1cORM.odata.expressions import BinExpr, FuncExpr, InExpr
 
+T = TypeVar('T')
 
-class FieldRef:
+
+class FieldRef[T]:
     def __init__(self, model, field_or_fields):
         self.model = model
 
@@ -18,13 +23,35 @@ class FieldRef:
     def path(self):
         return '/'.join(f.odata_name for f in self.fields)
 
+    def startswith(self, value: str) -> FuncExpr:
+        return FuncExpr('startswith', self, value)
+
+    def endswith(self, value: str) -> FuncExpr:
+        return FuncExpr('endswith', self, value)
+
+    # NB: не подсвечивает линтер, создана вспомогательная функция
+    def contains(self, value: str) -> FuncExpr:
+        return FuncExpr('contains', self, value)
+
+    # NB: не подсвечивает линтер, создана вспомогательная функция
+    def in_(self, values: Iterable[T]) -> InExpr:
+        return InExpr(self, values)
+
     def __getattr__(self, item):
         # --- операции над полем ---
-        if item == 'contains':
-            return lambda value: FuncExpr('contains', self, value)
-
-        if item == 'in_':
-            return lambda values: InExpr(self, values)
+        # if item == 'contains':
+        #     return lambda value: FuncExpr('contains', self, value)
+        #
+        # if item == 'in_':
+        #     return lambda values: InExpr(self, values)
+        #
+        # if item == 'startswith':
+        #     return lambda \
+        #         value: FuncExpr('startswith', self, value)
+        #
+        # if item == 'endswith':
+        #     return lambda \
+        #         value: FuncExpr('endswith', self, value)
 
         # --- переход по relation ---
         field = self.field

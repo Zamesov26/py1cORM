@@ -77,12 +77,9 @@ def serialize_value(value, field=None):
 
         if isinstance(value, str):
             value = UUID(value)
-        
+
         if field.entity_type:
-            return (
-                f"cast(guid'{value}', "
-                f"'{field.entity_type}')"
-            )
+            return f"cast(guid'{value}', '{field.entity_type}')"
 
         return f"guid'{value}'"
 

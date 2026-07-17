@@ -48,6 +48,12 @@ def kwargs_to_expr(model, kwargs: dict):
             else:
                 expr = BinExpr(field_ref, 'ne', None)
 
+        elif lookup == 'startswith':
+            expr = FuncExpr('startswith', field_ref, value)
+
+        elif lookup == 'endswith':
+            expr = FuncExpr('endswith', field_ref, value)
+
         else:
             raise ValueError(f'Unsupported lookup: {lookup}')
 
@@ -119,15 +125,15 @@ class QuerySet[T]:
         qs.spec.top = top
         qs.spec.skip = skip
         return qs
-    
+
     def _finalize_defaults(self):
         if self.spec.select is not None:
             pk_name = getattr(self.model.Meta, 'pk', None)
-            
+
             if pk_name:
                 pk_field = self.model._fields[pk_name]
                 pk_odata = pk_field.odata_name
-                
+
                 if pk_odata not in self.spec.select:
                     self.spec.select.append(pk_odata)
 

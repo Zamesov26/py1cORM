@@ -3,9 +3,7 @@ from py1cORM.models.fields import Field as _Field
 from py1cORM.models.fields import ForeignKey as _ForeignKey
 
 
-def Field(
-    *, alias=None, odata_name=None, auto_expand=False, default=None
-):
+def Field(*, alias=None, odata_name=None, auto_expand=False, default=None):
     return _Field(
         alias=alias,
         odata_name=odata_name,

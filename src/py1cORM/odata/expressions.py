@@ -32,10 +32,7 @@ class BinExpr(Expr):
         self.left, self.op, self.right = left, op, right
 
     def to_odata(self):
-        right = serialize_value(
-            self.right,
-            field=self.left.field
-        )
+        right = serialize_value(self.right, field=self.left.field)
         return f'{self.left.path} {self.op} {right}'
 
 
