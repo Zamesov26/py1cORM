@@ -95,19 +95,19 @@ class QuerySet[T: ODataModel]:
         """Создать независимую копию текущей спецификации запроса."""
         return QuerySet(self.client, self.model, deepcopy(self.spec))
 
-    def select(self, *fields):
+    def select(self, *fields: object) -> QuerySet[T]:
         """Ограничить ответ указанными полями модели."""
         qs = self.clone()
         qs.spec.select = [field_to_path(self.model, f) for f in fields]
         return qs
 
-    def expand(self, *fields) -> QuerySet[T]:
+    def expand(self, *fields: object) -> QuerySet[T]:
         """Добавить раскрытие указанных связей через ``$expand``."""
         qs = self.clone()
         qs.spec.expand = [field_to_path(self.model, f) for f in fields]
         return qs
 
-    def filter(self, *conditions) -> QuerySet[T]:
+    def filter(self, *conditions: object) -> QuerySet[T]:
         """Добавить выражение или готовую строку фильтра OData."""
         serialized = []
 
@@ -126,7 +126,7 @@ class QuerySet[T: ODataModel]:
             qs.spec.filter = f'({" and ".join(serialized)})'
         return qs
 
-    def order_by(self, *fields) -> QuerySet[T]:
+    def order_by(self, *fields: object) -> QuerySet[T]:
         """Задать порядок результатов по полям и направлениям сортировки."""
         qs = self.clone()
         qs.spec.orderby = [order_to_odata(self.model, f) for f in fields]
@@ -193,7 +193,7 @@ class QuerySet[T: ODataModel]:
             yield batch
             skip += batch_size
 
-    def get(self, **kwargs):
+    def get(self, **kwargs: object) -> T:
         """Получить единственную сущность по именованным условиям.
 
         Raises:

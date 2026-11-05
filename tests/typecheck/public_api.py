@@ -1,5 +1,6 @@
 """Проверить вывод типов декларативных моделей без плагинов анализаторов."""
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, assert_type
 from uuid import UUID
 
@@ -7,7 +8,7 @@ from py1cORM import Mapped
 from py1cORM.models.base import ODataModel
 from py1cORM.models.fields import Embedded, Field, Relationship
 from py1cORM.odata.expressions import BinExpr
-from py1cORM.odata.fields import FieldRef
+from py1cORM.odata.fields import FieldRef, PathRef
 from py1cORM.odata.query import QuerySet
 
 
@@ -56,10 +57,12 @@ assert_type(Product.name, FieldRef[Product, str])
 assert_type(Product.category_id, FieldRef[Product, UUID | None])
 assert_type(Product.category, FieldRef[Product, Category | None])
 assert_type(Product.rows, FieldRef[Product, list[Row]])
-assert_type(Product.category.then(Category.name), FieldRef[Category, str])
+assert_type(Product.rows.then(Row.quantity), PathRef[int])
+assert_type(Product.category.then(Category.name), PathRef[str])
+assert_type(Product.category.then(Category.parent), PathRef[ParentCategory | None])
 assert_type(
     Product.category.then(Category.parent).then(ParentCategory.name),
-    FieldRef[ParentCategory, str],
+    PathRef[str],
 )
 assert_type(Product.uid == UUID(int=1), BinExpr)
 
@@ -77,4 +80,8 @@ assert_type(product.rows, list[Row])
 
 query = QuerySet(None, Product)
 assert_type(query, QuerySet[Product])
+assert_type(query.select(Product.name), QuerySet[Product])
+assert_type(query.order_by(Product.name), QuerySet[Product])
 assert_type(query.all(), list[Product])
+assert_type(query.batched(), Iterable[list[Product]])
+assert_type(query.get(), Product)

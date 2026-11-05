@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import overload
 
 from py1cORM.odata.expressions import BinExpr, FuncExpr, InExpr
 
@@ -46,10 +47,19 @@ class FieldRef[ModelT, T]:
         """Построить проверку принадлежности поля коллекции значений."""
         return InExpr(self, values)
 
+    @overload
+    def then[RelatedT, U](
+        self: FieldRef[ModelT, list[RelatedT]],
+        next_ref: FieldRef[RelatedT, U],
+    ) -> PathRef[U]: ...
+
+    @overload
     def then[RelatedT, U](
         self: FieldRef[ModelT, RelatedT | None],
         next_ref: FieldRef[RelatedT, U],
-    ) -> FieldRef[RelatedT, U]:
+    ) -> PathRef[U]: ...
+
+    def then(self, next_ref):
         """Продолжить путь полем целевой модели отношения."""
         terminal = self.field
         if not terminal.is_relation:
@@ -60,7 +70,7 @@ class FieldRef[ModelT, T]:
                 f'{next_ref.path} belongs to {next_ref.model.__name__}, '
                 f'expected {target_model.__name__}'
             )
-        return FieldRef(next_ref.model, self.fields + next_ref.fields)
+        return PathRef(next_ref.model, self.fields + next_ref.fields)
 
     def __eq__(self, other: object) -> BinExpr:  # type: ignore[override]
         return BinExpr(self, 'eq', other)
@@ -79,6 +89,10 @@ class FieldRef[ModelT, T]:
 
     def __le__(self, other: object) -> BinExpr:
         return BinExpr(self, 'le', other)
+
+
+class PathRef[T](FieldRef[object, T]):
+    """Составной путь с типом значения в его текущей конечной точке."""
 
 
 def like(field: FieldRef, pattern: str):
