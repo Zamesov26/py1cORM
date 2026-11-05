@@ -303,10 +303,12 @@ for item in query.all():
 в CI:
 
 ```shell
-ruff format --check .
-ruff check .
-pytest -q
+make check
 ```
+
+Установка инструментов разработки выполняется командой `make install`,
+автоматическое форматирование — `make format`. Остальные доступные цели
+описаны в [`Makefile`](Makefile).
 
 GitHub Actions запускает проверки для pull request и после попадания изменений
 в `main`. Прямые push в `main` запрещены; рабочий процесс с короткими ветками

@@ -28,5 +28,8 @@ jobs:
       - name: Lint
         run: ruff check .
 
+      - name: Check types
+        run: mypy
+
       - name: Test
         run: pytest -q --cov=src/py1cORM --cov-report=term-missing:skip-covered

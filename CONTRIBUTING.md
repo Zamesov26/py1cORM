@@ -5,21 +5,23 @@
 Установите проект вместе с инструментами разработки:
 
 ```shell
-pip install -e ".[dev]"
+make install
 ```
 
-Перед коммитом выполните:
+Перед коммитом выполните полный набор проверок:
 
 ```shell
-ruff format --check .
-ruff check .
-pytest -q
+make check
 ```
 
-Для измерения покрытия выполните:
+Для запуска отдельных проверок доступны цели:
 
 ```shell
-pytest -q --cov=src/py1cORM --cov-report=term-missing:skip-covered
+make format
+make lint
+make typecheck
+make test
+make coverage
 ```
 
 ## Ветки и pull requests
