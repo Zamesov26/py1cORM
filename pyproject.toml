@@ -43,9 +43,6 @@ dev = [
 where = ["src"]
 include = ["py1cORM*"]
 
-[tool.setuptools.package-data]
-py1cORM = ["py.typed"]
-
 [tool.ruff]
 line-length = 88
 target-version = "py312"
