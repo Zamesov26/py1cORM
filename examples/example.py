@@ -5,7 +5,7 @@ from uuid import UUID
 
 from py1cORM.connection import ODataConnection
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Embedded, Field, ForeignKey
+from py1cORM.models.fields import Embedded, Field, Mapped, Relationship
 
 # -------------------------------
 # 1. Описание моделей
@@ -15,15 +15,15 @@ from py1cORM.models.fields import Embedded, Field, ForeignKey
 class WorkCenterModel(ODataModel):
     """Вид рабочего центра из вложенной структуры этапа производства."""
 
-    uid: UUID | None = Field(alias='ВидРабочегоЦентра_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[UUID | None] = Field(alias='ВидРабочегоЦентра_Key')
+    name: Mapped[str] = Field(alias='Description')
 
 
 class ProductStageModel(ODataModel):
     """Этап производства с доступными видами рабочих центров."""
 
-    owner_id: UUID | None = Field(alias='Owner_Key')
-    work_centers: list[WorkCenterModel] = Embedded(
+    owner_id: Mapped[UUID | None] = Field(alias='Owner_Key')
+    work_centers: Mapped[list[WorkCenterModel]] = Embedded(
         model=WorkCenterModel,
         alias='ВидыРабочихЦентров',
     )
@@ -35,30 +35,30 @@ class ProductStageModel(ODataModel):
 class ProductionModel(ODataModel):
     """Строка изделия или материала ресурсной спецификации."""
 
-    uid: UUID | None = Field(alias='Ref_Key')
-    nomenclature_key: UUID | None = Field(alias='Номенклатура_Key')
+    uid: Mapped[UUID | None] = Field(alias='Ref_Key')
+    nomenclature_key: Mapped[UUID | None] = Field(alias='Номенклатура_Key')
 
 
 class ResourceSpecificationsModel(ODataModel):
     """Ресурсная спецификация с изделиями, материалами и этапом производства."""
 
-    uid_1c: UUID | None = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
+    uid_1c: Mapped[UUID | None] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
 
-    productions: list[ProductionModel] = Embedded(
+    productions: Mapped[list[ProductionModel]] = Embedded(
         model=ProductionModel,
         alias='ВыходныеИзделия',
     )
 
-    input_productions: list[ProductionModel] = Embedded(
+    input_productions: Mapped[list[ProductionModel]] = Embedded(
         model=ProductionModel,
         alias='МатериалыИУслуги',
     )
 
-    product_stage: ProductStageModel | None = ForeignKey(
+    product_stage_id: Mapped[UUID | None] = Field(alias='ОсновноеИзделиеЭтап_Key')
+    product_stage: Mapped[ProductStageModel | None] = Relationship(
         model=ProductStageModel,
         alias='ОсновноеИзделиеЭтап',
-        key_field='ОсновноеИзделиеЭтап_Key',
     )
 
     class Meta:
@@ -98,9 +98,7 @@ items_with_stage = (
 
 for item in items_with_stage:
     if item.is_loaded('product_stage'):
-        fk = item.product_stage
-        print('Stage key:', fk.id)
-
-        if fk.is_loaded():
-            print('Owner:', fk.owner_id)
-            print('Work centers:', len(fk.work_centers))
+        print('Stage key:', item.product_stage_id)
+        if item.product_stage is not None:
+            print('Owner:', item.product_stage.owner_id)
+            print('Work centers:', len(item.product_stage.work_centers))
