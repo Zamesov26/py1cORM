@@ -1,3 +1,4 @@
+import pytest
 from tests.models import Product
 
 from py1cORM.odata.query import kwargs_to_expr
@@ -28,3 +29,13 @@ def test_combines_expressions_when_multiple_conditions_are_given():
     )
     odata = expr.to_odata()
     assert 'and' in odata
+
+
+def test_rejects_expression_when_field_is_unknown():
+    with pytest.raises(ValueError, match='Unknown field'):
+        kwargs_to_expr(Product, {'unknown': 'value'})
+
+
+def test_rejects_expression_when_lookup_is_unsupported():
+    with pytest.raises(ValueError, match='Unsupported lookup'):
+        kwargs_to_expr(Product, {'name__regex': 'value'})
