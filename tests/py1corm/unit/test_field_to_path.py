@@ -1,5 +1,6 @@
-from py1cORM.odata.utils import field_to_path
 from tests.models import Product
+
+from py1cORM.odata.utils import field_to_path
 
 
 def test_scalar_path():

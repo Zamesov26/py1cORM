@@ -1,5 +1,6 @@
-from py1cORM.odata.query import kwargs_to_expr
 from tests.models import Product
+
+from py1cORM.odata.query import kwargs_to_expr
 
 
 def test_eq_lookup():

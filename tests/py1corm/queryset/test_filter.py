@@ -1,5 +1,6 @@
-from py1cORM.odata.query import QuerySet
 from tests.models import Product
+
+from py1cORM.odata.query import QuerySet
 
 
 class DummyClient:
