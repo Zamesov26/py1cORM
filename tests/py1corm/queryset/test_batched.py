@@ -1,3 +1,7 @@
+from unittest.mock import call, patch
+
+import pytest
+
 from py1cORM.odata.query import QuerySet
 
 
@@ -104,3 +108,21 @@ def test_batched_with_exact_multiple_of_batch():
     # ---------------------------
     flat = [item for batch in result for item in batch]
     assert flat == data
+
+
+def test_batched_waits_between_requests():
+    client = DummyClient(list(range(3)))
+    qs = QuerySet(client, DummyModel)
+
+    with patch('py1cORM.odata.query.sleep') as sleep:
+        result = list(qs.batched(batch_size=2, delay=0.5))
+
+    assert result == [[0, 1], [2]]
+    assert sleep.call_args_list == [call(0.5), call(0.5)]
+
+
+def test_batched_rejects_negative_delay():
+    qs = QuerySet(DummyClient([]), DummyModel)
+
+    with pytest.raises(ValueError, match='Delay cannot be negative'):
+        list(qs.batched(delay=-1))

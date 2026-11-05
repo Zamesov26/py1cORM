@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass
+from time import sleep
 from typing import TYPE_CHECKING, TypeVar
 
 from py1cORM.odata.expressions import AndExpr, BinExpr, Expr, FuncExpr
@@ -142,11 +143,20 @@ class QuerySet[T]:
         data = self.client.get_collection(self.model.Meta.entity_name, self.spec)
         return [self.model.from_raw(item) for item in data]
 
-    def batched(self, batch_size: int = 100) -> Iterable[list[T]]:
+    def batched(self, batch_size: int = 100, delay: float = 0) -> Iterable[list[T]]:
+        if delay < 0:
+            raise ValueError('Delay cannot be negative')
+
         skip = 0
+        is_first_request = True
 
         while True:
+            if not is_first_request and delay:
+                sleep(delay)
+
             batch = self.paginate(top=batch_size, skip=skip).all()
+            is_first_request = False
+
             if not batch:
                 break
 
