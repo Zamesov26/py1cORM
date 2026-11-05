@@ -1,10 +1,15 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "py1cORM"
-version = "0.1.0.dev2"
+version = "0.1.0"
 authors = [
   { name="Oleg Zamesov", email="o.zamesov@yandex.ru" },
 ]
 dependencies = [
+  "python-dateutil>=2.9",
   "requests>=2.32",
 ]
 description = "ORM for 1C"
@@ -23,8 +28,22 @@ classifiers = [
 Homepage = "https://github.com/Zamesov26/py1cORM"
 AuthorGitHub = "https://github.com/Zamesov26"
 
+[project.optional-dependencies]
+dev = [
+    "python-semantic-release>=10.7,<11",
+    "pytest>=9.1,<10",
+    "pytest-cov>=7,<8",
+    "ruff==0.16.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["py1cORM*"]
+
 [tool.ruff]
 line-length = 88
+target-version = "py312"
+src = ["src", "tests"]
 extend-exclude = [
     "**/__pycache__/**",
     ".venv/",
@@ -35,8 +54,14 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-ignore = ["E501"]
+ignore = [
+    "E501",
+    "D105", # Magic methods are self-describing.
+    "D106", # Nested Meta classes configure models.
+    "D107", # Constructors are described by classes and signatures.
+]
 select = [
+    "D", # pydocstyle
     "E", # pycodestyle
     "F", # Pyflakes
     "UP", # pyupgrade
@@ -44,7 +69,20 @@ select = [
     "SIM", # flake8-simplify
     "I", # isort
     "C", # flake8-comprehensions
+    "PT", # flake8-pytest-style
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
 
 [tool.ruff.format]
 quote-style = "single"
@@ -55,3 +93,19 @@ line-ending = "lf"
 docstring-quotes = "double"
 inline-quotes = "single"
 multiline-quotes = "double"
+
+[tool.semantic_release]
+commit_parser = "conventional"
+version_toml = ["pyproject.toml:project.version"]
+tag_format = "v{version}"
+allow_zero_version = true
+major_on_zero = false
+commit_message = "chore(release): {version}"
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.changelog.default_templates]
+changelog_file = "CHANGELOG.md"
+output_format = "md"

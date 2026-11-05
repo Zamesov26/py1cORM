@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from py1cORM.models.base import ODataModel
 from py1cORM.models.fields import Field, ForeignKey
 
@@ -25,6 +27,7 @@ class Category(ODataModel):
 
 
 class Product(ODataModel):
+    uid_1c: UUID = Field(alias='Ref_Key')
     name: str = Field(alias='Description')
 
     category: Category | None = ForeignKey(

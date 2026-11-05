@@ -1,7 +1,16 @@
+"""Ссылки на поля моделей для путей, сравнений и функций OData."""
+
+from collections.abc import Iterable
+from typing import TypeVar
+
 from py1cORM.odata.expressions import BinExpr, FuncExpr, InExpr
 
+T = TypeVar('T')
 
-class FieldRef:
+
+class FieldRef[T]:
+    """Ссылка на поле или цепочку связанных полей модели OData."""
+
     def __init__(self, model, field_or_fields):
         self.model = model
 
@@ -12,19 +21,47 @@ class FieldRef:
 
     @property
     def field(self):
+        """Вернуть конечное поле цепочки."""
         return self.fields[-1]
 
     @property
     def path(self):
+        """Вернуть OData-путь через связанные поля."""
         return '/'.join(f.odata_name for f in self.fields)
+
+    def startswith(self, value: str) -> FuncExpr:
+        """Построить проверку начала строкового поля."""
+        return FuncExpr('startswith', self, value)
+
+    def endswith(self, value: str) -> FuncExpr:
+        """Построить проверку окончания строкового поля."""
+        return FuncExpr('endswith', self, value)
+
+    # NB: не подсвечивает линтер, создана вспомогательная функция
+    def contains(self, value: str) -> FuncExpr:
+        """Построить проверку вхождения значения в строковое поле."""
+        return FuncExpr('contains', self, value)
+
+    # NB: не подсвечивает линтер, создана вспомогательная функция
+    def in_(self, values: Iterable[T]) -> InExpr:
+        """Построить проверку принадлежности поля коллекции значений."""
+        return InExpr(self, values)
 
     def __getattr__(self, item):
         # --- операции над полем ---
-        if item == 'contains':
-            return lambda value: FuncExpr('contains', self, value)
-
-        if item == 'in_':
-            return lambda values: InExpr(self, values)
+        # if item == 'contains':
+        #     return lambda value: FuncExpr('contains', self, value)
+        #
+        # if item == 'in_':
+        #     return lambda values: InExpr(self, values)
+        #
+        # if item == 'startswith':
+        #     return lambda \
+        #         value: FuncExpr('startswith', self, value)
+        #
+        # if item == 'endswith':
+        #     return lambda \
+        #         value: FuncExpr('endswith', self, value)
 
         # --- переход по relation ---
         field = self.field
@@ -63,8 +100,10 @@ class FieldRef:
 
 
 def like(field: FieldRef, pattern: str):
+    """Построить специфичную для 1С функцию сопоставления с шаблоном."""
     return FuncExpr('like', field, pattern)
 
 
 def contains(field: FieldRef, value: str):
+    """Построить функцию проверки вхождения для указанного поля."""
     return FuncExpr('contains', field, value)

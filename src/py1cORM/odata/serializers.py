@@ -1,3 +1,5 @@
+"""Сериализация Python-значений в литералы фильтров OData."""
+
 from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
@@ -40,8 +42,8 @@ def _serialize_str(value: str):
     return f"'{escaped}'"
 
 
-def _serialize_collection(values, expected_type=None):
-    serialized = [serialize_value(v, expected_type) for v in values]
+def _serialize_collection(values, field=None):
+    serialized = [serialize_value(v, field) for v in values]
     return f'({", ".join(serialized)})'
 
 
@@ -58,25 +60,29 @@ _TYPE_SERIALIZERS = {
 }
 
 
-def serialize_value(value, expected_type=None):
+def serialize_value(value, field=None):
+    """Сериализовать значение с учётом типа декларативного поля."""
     # выражения (вложенные Expr)
     if hasattr(value, 'to_odata'):
         return value.to_odata()
 
     # коллекции
     if isinstance(value, (list, tuple, set)):
-        return _serialize_collection(value, expected_type)
+        return _serialize_collection(value, field=field)
 
     # -------------------------
     # Тип поля важнее типа значения
     # -------------------------
 
-    if expected_type is UUID:
+    if field and field.annotation is UUID:
         if value is None:
             return 'null'
 
         if isinstance(value, str):
             value = UUID(value)
+
+        if field.entity_type:
+            return f"cast(guid'{value}', '{field.entity_type}')"
 
         return f"guid'{value}'"
 

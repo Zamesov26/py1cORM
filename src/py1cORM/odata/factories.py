@@ -1,15 +1,15 @@
+"""Фабрики декларативных полей с настройками по умолчанию для OData."""
+
 from py1cORM.models.fields import Embedded as _Embedded
 from py1cORM.models.fields import Field as _Field
 from py1cORM.models.fields import ForeignKey as _ForeignKey
 
 
-def Field(
-    *, alias=None, odata_name=None, auto_select=True, auto_expand=False, default=None
-):
+def Field(*, alias=None, odata_name=None, auto_expand=False, default=None):
+    """Создать скалярное поле модели OData."""
     return _Field(
         alias=alias,
         odata_name=odata_name,
-        auto_select=auto_select,
         auto_expand=auto_expand,
         default=default,
     )
@@ -20,15 +20,14 @@ def Embedded(
     model,
     alias=None,
     odata_name=None,
-    auto_select=True,
     auto_expand=False,
     default=None,
 ):
+    """Создать поле встроенной структуры или коллекции."""
     return _Embedded(
         model=model,
         alias=alias,
         odata_name=odata_name,
-        auto_select=auto_select,
         auto_expand=auto_expand,
         default=default,
     )
@@ -40,16 +39,15 @@ def ForeignKey(
     key_field,
     alias=None,
     odata_name=None,
-    auto_select=True,
     auto_expand=True,
     default=None,
 ):
+    """Создать поле внешнего ключа с автоматическим раскрытием по умолчанию."""
     return _ForeignKey(
         model=model,
         key_field=key_field,
         alias=alias,
         odata_name=odata_name,
-        auto_select=auto_select,
         auto_expand=auto_expand,
         default=default,
     )

@@ -1,3 +1,5 @@
+"""Преобразование значений JSON в типы, объявленные полями модели."""
+
 from datetime import datetime
 from types import UnionType
 from typing import Union, get_args, get_origin
@@ -64,6 +66,7 @@ def _convert_scalar(value, annotation):
 
 
 def convert(value, annotation):
+    """Преобразовать значение ответа согласно аннотации поля модели."""
     if value is None:
         return None
 

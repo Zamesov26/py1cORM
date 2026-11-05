@@ -1,7 +1,15 @@
+"""Декларативные поля моделей и описания связей OData."""
+
+from typing import Generic, TypeVar
+
 from py1cORM.odata.fields import FieldRef
 
+T = TypeVar('T')
 
-class Field:
+
+class Field[T]:
+    """Скалярное поле модели с сопоставлением имени из ответа OData."""
+
     is_relation = False
     is_embedded = False
     is_foreign_key = False
@@ -11,13 +19,14 @@ class Field:
         *,
         alias: str | None = None,
         odata_name: str | None = None,
-        auto_select: bool = True,
         auto_expand: bool = False,
+        entity_type: str | None = None,
         default=None,
     ):
+
+        self.entity_type = entity_type
         self.alias = alias
         self.odata_name = odata_name or alias
-        self.auto_select = auto_select
         self.auto_expand = auto_expand
         self.default = default
 
@@ -26,6 +35,7 @@ class Field:
         self.annotation = None
 
     def bind(self, model, attr_name: str, annotation):
+        """Связать поле с моделью, Python-именем и аннотацией типа."""
         self.model = model
         self.attr_name = attr_name
         self.annotation = annotation
@@ -35,14 +45,35 @@ class Field:
 
         return self
 
-    def ref(self):
+    def ref(self) -> Generic[T]:
+        """Вернуть ссылку на поле для построения OData-выражений."""
         return FieldRef(self.model, self)
 
     def get_related_model(self):
+        """Сообщить, что скалярное поле не содержит связанную модель."""
         raise AttributeError(f"Field '{self.attr_name}' is not a relation")
 
 
+class TypedGuid(Field):
+    """GUID-поле, сериализуемое с явным типом сущности 1С."""
+
+    def __init__(
+        self,
+        *,
+        entity_type,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.entity_type = entity_type
+
+    def serialize_filter(self, value):
+        """Сериализовать GUID для типизированного фильтра 1С."""
+        return f"cast(guid'{value}', '{self.entity_type}')"
+
+
 class Embedded(Field):
+    """Встроенная структура или коллекция объектов в ответе OData."""
+
     is_relation = True
     is_embedded = True
 
@@ -52,10 +83,13 @@ class Embedded(Field):
         self.expand_only = expand_only
 
     def get_related_model(self):
+        """Вернуть модель элементов встроенной структуры."""
         return self.embedded_model
 
 
 class ForeignKey(Field):
+    """Связь по GUID с возможностью загрузки сущности через ``$expand``."""
+
     is_relation = True
     is_foreign_key = True
 
@@ -65,4 +99,23 @@ class ForeignKey(Field):
         self.key_field = key_field
 
     def get_related_model(self):
+        """Вернуть модель связанной сущности."""
+        return self.related_model
+
+
+class Navigation(Field):
+    """Навигационное свойство OData без собственного GUID.
+
+    Значение может быть загружено через ``$expand`` или navigation link URL.
+    """
+
+    is_relation = True
+    is_navigation = True
+
+    def __init__(self, *, model: type, **kwargs):
+        super().__init__(**kwargs)
+        self.related_model = model
+
+    def get_related_model(self):
+        """Вернуть модель навигационного свойства."""
         return self.related_model

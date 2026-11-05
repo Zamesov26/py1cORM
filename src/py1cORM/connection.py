@@ -1,3 +1,5 @@
+"""Подключение к стандартному OData-интерфейсу информационной базы 1С."""
+
 from urllib.parse import quote, urlencode
 
 import requests
@@ -7,6 +9,8 @@ from py1cORM.odata.query import QuerySpec
 
 
 class ODataConnection:
+    """Клиент чтения коллекций из стандартного OData-интерфейса 1С."""
+
     def __init__(
         self,
         *,
@@ -14,10 +18,13 @@ class ODataConnection:
         database: str,
         username: str,
         password: str,
+        connection_timeout: int | float = 10,
+        read_timeout: int | float = 121,
     ):
         self.host = host.rstrip('/')
         self.database = database
         self.auth = HTTPBasicAuth(username, password)
+        self.timeout = (connection_timeout, read_timeout)
 
         self.base_url = f'{self.host}/{self.database}/odata/standard.odata'
 
@@ -26,6 +33,7 @@ class ODataConnection:
     # -----------------------------
 
     def get_collection(self, entity_name: str, spec: QuerySpec):
+        """Загрузить коллекцию сущностей с параметрами запроса из спецификации."""
         url = f'{self.base_url}/{entity_name}'
 
         params = {}
@@ -54,6 +62,7 @@ class ODataConnection:
         response = requests.get(
             f'{url}?{query_string}',
             auth=self.auth,
+            timeout=self.timeout,
         )
 
         response.raise_for_status()
