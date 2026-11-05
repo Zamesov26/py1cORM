@@ -308,8 +308,9 @@ ruff check .
 pytest -q
 ```
 
-GitHub Actions запускает проверки для pull request и при отправке изменений в
-ветки `main` и `dev`.
+GitHub Actions запускает проверки для pull request и после попадания изменений
+в `main`. Прямые push в `main` запрещены; рабочий процесс с короткими ветками
+описан в [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Версионирование
 

@@ -22,6 +22,29 @@ pytest -q
 pytest -q --cov=src/py1cORM --cov-report=term-missing:skip-covered
 ```
 
+## Ветки и pull requests
+
+`main` — единственная долгоживущая ветка и всегда должна оставаться в рабочем,
+потенциально релизном состоянии. Постоянная интеграционная ветка `dev` не
+используется.
+
+Каждое изменение начинается в короткой ветке от актуальной `main`:
+
+```shell
+git switch main
+git pull --ff-only
+git switch -c feat/order-validation
+```
+
+Префикс отражает назначение изменения: `feat/`, `fix/`, `docs/`, `test/`,
+`build/`, `ci/`, `refactor/` или `chore/`. Ветка содержит одно связное изменение
+и попадает в `main` только через pull request. Прямые push и commit в `main`
+запрещены правилами репозитория.
+
+Перед merge pull request должен пройти обязательные проверки CI. После merge
+task-ветка удаляется. Стабильные релизные теги создаются только на коммитах
+`main`; task-ветки не получают релизных тегов.
+
 ## Коммиты
 
 Проект использует Conventional Commits:
@@ -43,7 +66,7 @@ pytest -q --cov=src/py1cORM --cov-report=term-missing:skip-covered
 Несовместимое изменение отмечается `!` и footer `BREAKING CHANGE:`. Пока версия
 ниже `1.0.0`, такое изменение увеличивает `MINOR`.
 
-Релиз запускается вручную workflow `Release` из ветки `main`. Версию в
+Релиз запускается вручную workflow `Release` только из ветки `main`. Версию в
 `pyproject.toml`, changelog и релизные теги после начальной настройки вручную не
 изменяем: это делает `python-semantic-release`.
 
