@@ -1,3 +1,5 @@
+"""Подключение к стандартному OData-интерфейсу информационной базы 1С."""
+
 from urllib.parse import quote, urlencode
 
 import requests
@@ -7,6 +9,8 @@ from py1cORM.odata.query import QuerySpec
 
 
 class ODataConnection:
+    """Клиент чтения коллекций из стандартного OData-интерфейса 1С."""
+
     def __init__(
         self,
         *,
@@ -26,6 +30,7 @@ class ODataConnection:
     # -----------------------------
 
     def get_collection(self, entity_name: str, spec: QuerySpec):
+        """Загрузить коллекцию сущностей с параметрами запроса из спецификации."""
         url = f'{self.base_url}/{entity_name}'
 
         params = {}

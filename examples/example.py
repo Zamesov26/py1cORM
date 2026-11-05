@@ -1,3 +1,5 @@
+"""Пример описания моделей и чтения данных из OData-интерфейса 1С."""
+
 import os
 from uuid import UUID
 
@@ -11,11 +13,15 @@ from py1cORM.models.fields import Embedded, Field, ForeignKey
 
 
 class WorkCenterModel(ODataModel):
+    """Вид рабочего центра из вложенной структуры этапа производства."""
+
     uid: UUID | None = Field(alias='ВидРабочегоЦентра_Key')
     name: str = Field(alias='Description')
 
 
 class ProductStageModel(ODataModel):
+    """Этап производства с доступными видами рабочих центров."""
+
     owner_id: UUID | None = Field(alias='Owner_Key')
     work_centers: list[WorkCenterModel] = Embedded(
         model=WorkCenterModel,
@@ -27,11 +33,15 @@ class ProductStageModel(ODataModel):
 
 
 class ProductionModel(ODataModel):
+    """Строка изделия или материала ресурсной спецификации."""
+
     uid: UUID | None = Field(alias='Ref_Key')
     nomenclature_key: UUID | None = Field(alias='Номенклатура_Key')
 
 
 class ResourceSpecificationsModel(ODataModel):
+    """Ресурсная спецификация с изделиями, материалами и этапом производства."""
+
     uid_1c: UUID | None = Field(alias='Ref_Key')
     name: str = Field(alias='Description')
 

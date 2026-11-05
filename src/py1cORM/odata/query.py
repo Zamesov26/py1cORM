@@ -1,3 +1,5 @@
+"""Спецификация и ленивое построение запросов к коллекциям OData."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -23,6 +25,7 @@ LOOKUP_MAP = {
 
 
 def kwargs_to_expr(model, kwargs: dict):
+    """Преобразовать именованные lookup-условия в выражение OData."""
     expressions = []
 
     for key, value in kwargs.items():
@@ -68,6 +71,8 @@ def kwargs_to_expr(model, kwargs: dict):
 
 @dataclass
 class QuerySpec:
+    """Параметры одного запроса к коллекции OData."""
+
     select: list[str] | None = None
     expand: list[str] | None = None
     filter: str | None = None
@@ -81,20 +86,25 @@ T = TypeVar('T', bound='ODataModel')
 
 
 class QuerySet[T]:
+    """Построитель запросов и загрузчик сущностей указанной модели."""
+
     def __init__(self, client, model: type[T], spec: QuerySpec | None = None):
         self.client = client
         self.model = model
         self.spec = spec or QuerySpec()
 
     def clone(self) -> QuerySet[T]:
+        """Создать независимую копию текущей спецификации запроса."""
         return QuerySet(self.client, self.model, QuerySpec(**vars(self.spec)))
 
     def select(self, *fields):
+        """Ограничить ответ указанными полями модели."""
         qs = self.clone()
         qs.spec.select = [field_to_path(self.model, f) for f in fields]
         return qs
 
     def expand(self, *fields) -> QuerySet[T]:
+        """Добавить раскрытие указанных связей через ``$expand``."""
         qs = self.clone()
         qs.spec.expand = [field_to_path(self.model, f) for f in fields]
         return qs
@@ -103,6 +113,7 @@ class QuerySet[T]:
     # NB: Подразумевается, что все фильтры образуют один объект(вложены друг в друга)
     # TODO: нужно объединить их всех с помощью AND
     def filter(self, *conditions) -> QuerySet[T]:
+        """Добавить выражение или готовую строку фильтра OData."""
         for condition in conditions:
             if isinstance(condition, Expr):
                 qs = self.clone()
@@ -115,6 +126,7 @@ class QuerySet[T]:
         return self
 
     def order_by(self, *fields) -> QuerySet[T]:
+        """Задать порядок результатов по полям и направлениям сортировки."""
         qs = self.clone()
         qs.spec.orderby = [order_to_odata(self.model, f) for f in fields]
         return qs
@@ -122,6 +134,7 @@ class QuerySet[T]:
     def paginate(
         self, *, top: int | None = None, skip: int | None = None
     ) -> QuerySet[T]:
+        """Задать ограничение и смещение коллекции."""
         qs = self.clone()
         qs.spec.top = top
         qs.spec.skip = skip
@@ -139,11 +152,24 @@ class QuerySet[T]:
                     self.spec.select.append(pk_odata)
 
     def all(self) -> list[T]:
+        """Выполнить запрос и преобразовать ответ в сущности модели."""
         self._finalize_defaults()
         data = self.client.get_collection(self.model.Meta.entity_name, self.spec)
         return [self.model.from_raw(item) for item in data]
 
     def batched(self, batch_size: int = 100, delay: float = 0) -> Iterable[list[T]]:
+        """Последовательно загружать страницы с паузой между запросами.
+
+        Args:
+            batch_size: Максимальное количество сущностей в одном запросе.
+            delay: Пауза между соседними запросами в секундах.
+
+        Yields:
+            Очередная непустая страница сущностей.
+
+        Raises:
+            ValueError: Передана отрицательная длительность паузы.
+        """
         if delay < 0:
             raise ValueError('Delay cannot be negative')
 
@@ -164,6 +190,11 @@ class QuerySet[T]:
             skip += batch_size
 
     def get(self, **kwargs):
+        """Получить единственную сущность по именованным условиям.
+
+        Raises:
+            LookupError: Сущность не найдена или найдено несколько сущностей.
+        """
         qs = self
 
         if kwargs:

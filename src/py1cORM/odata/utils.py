@@ -1,7 +1,10 @@
+"""Преобразование Python-ссылок и имён полей в пути OData."""
+
 from py1cORM.odata.fields import FieldRef
 
 
 def build_fieldref_from_string(model, field: str) -> FieldRef:
+    """Построить ссылку на поле из пути с разделителем ``__``."""
     parts = field.split('__')
     current_model = model
     fields = []
@@ -27,6 +30,7 @@ def build_fieldref_from_string(model, field: str) -> FieldRef:
 
 
 def field_to_path(model, field):
+    """Преобразовать имя или ссылку на поле в путь OData."""
     if isinstance(field, FieldRef):
         return field.path
 
@@ -37,6 +41,7 @@ def field_to_path(model, field):
 
 
 def order_to_odata(model, field):
+    """Преобразовать описание сортировки в выражение ``$orderby``."""
     if isinstance(field, tuple):
         name, direction = field
         path = field_to_path(model, name)

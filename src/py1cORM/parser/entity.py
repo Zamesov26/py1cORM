@@ -1,3 +1,5 @@
+"""Сущность времени выполнения с контролем загруженных полей."""
+
 from uuid import UUID
 
 from py1cORM.exceptions import FieldNotLoadedError
@@ -8,6 +10,8 @@ from py1cORM.parser.sentinels import NotLoaded
 
 
 class Entity:
+    """Типизированное представление одной записи ответа OData."""
+
     def __init__(self, model_cls, raw: dict):
         self._model = model_cls
         self._extra = {}
@@ -63,6 +67,7 @@ class Entity:
                 self._extra[key] = value
 
     def extra(self):
+        """Вернуть поля ответа, которые не объявлены в модели."""
         return dict(self._extra)
 
     def __getattribute__(self, item):
@@ -76,6 +81,7 @@ class Entity:
         return value
 
     def is_loaded(self, field_name: str) -> bool:
+        """Проверить, было ли поле загружено из ответа OData."""
         return field_name in self._loaded_fields
 
     def _call_model_str(self):

@@ -1,3 +1,5 @@
+"""Низкоуровневые HTTP-запросы с управлением сессией и тайм-аутами."""
+
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote, urlencode
@@ -11,6 +13,8 @@ from py1cORM.exceptions import ClientConnectionError
 
 @dataclass
 class Request:
+    """Описание HTTP-запроса относительно базового адреса подключения."""
+
     method: str
     relative_url: str
     query_params: dict[str, Any] | None = None
@@ -18,6 +22,8 @@ class Request:
 
 
 class Connection:
+    """HTTP-подключение с аутентификацией и раздельными тайм-аутами."""
+
     def __init__(
         self,
         host: str,
@@ -51,12 +57,14 @@ class Connection:
     def get_url(
         self, relative_url: str, query_params: dict[str, Any] | None = None
     ) -> str:
+        """Собрать абсолютный URL и закодировать query-параметры."""
         url = f'{self.base_url}{relative_url}'
         if query_params:
             url = f'{url}?{urlencode(query_params, quote_via=quote)}'
         return url
 
     def send_request(self, request: Request) -> requests.Response:
+        """Отправить подготовленный запрос и преобразовать сетевые ошибки."""
         session = self._session or self._create_session()
         url = self.get_url(request.relative_url, request.query_params)
         req = requests.Request(method=request.method, url=url, json=request.data)

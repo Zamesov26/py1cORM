@@ -1,3 +1,5 @@
+"""Сериализация Python-значений в литералы фильтров OData."""
+
 from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
@@ -59,6 +61,7 @@ _TYPE_SERIALIZERS = {
 
 
 def serialize_value(value, field=None):
+    """Сериализовать значение с учётом типа декларативного поля."""
     # выражения (вложенные Expr)
     if hasattr(value, 'to_odata'):
         return value.to_odata()

@@ -41,6 +41,7 @@ include = ["py1cORM*"]
 
 [tool.ruff]
 line-length = 88
+target-version = "py312"
 src = ["src", "tests"]
 extend-exclude = [
     "**/__pycache__/**",
@@ -52,8 +53,14 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-ignore = ["E501"]
+ignore = [
+    "E501",
+    "D105", # Magic methods are self-describing.
+    "D106", # Nested Meta classes configure models.
+    "D107", # Constructors are described by classes and signatures.
+]
 select = [
+    "D", # pydocstyle
     "E", # pycodestyle
     "F", # Pyflakes
     "UP", # pyupgrade
@@ -67,8 +74,14 @@ select = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [
     "D100",
+    "D101",
+    "D102",
+    "D103",
     "D104",
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
 
 [tool.ruff.format]
 quote-style = "single"
