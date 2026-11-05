@@ -1,5 +1,5 @@
 import pytest
-from tests.models import Product
+from tests.models import Category, Product
 
 from py1cORM.odata.query import QuerySet
 
@@ -12,7 +12,7 @@ def test_uses_field_path_when_direction_is_omitted():
 
 def test_uses_direction_when_order_tuple_is_valid():
     qs = QuerySet(None, Product).order_by(
-        ('name', 'asc'), (Product.category.name, 'desc')
+        ('name', 'asc'), (Product.category.then(Category.name), 'desc')
     )
 
     assert qs.spec.orderby == ['Description asc', 'Category/Name desc']

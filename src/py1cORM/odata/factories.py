@@ -2,7 +2,7 @@
 
 from py1cORM.models.fields import Embedded as _Embedded
 from py1cORM.models.fields import Field as _Field
-from py1cORM.models.fields import ForeignKey as _ForeignKey
+from py1cORM.models.fields import Relationship as _Relationship
 
 
 def Field(*, alias=None, odata_name=None, auto_expand=False, default=None):
@@ -33,19 +33,17 @@ def Embedded(
     )
 
 
-def ForeignKey(
+def Relationship(
     *,
     model,
-    key_field,
     alias=None,
     odata_name=None,
     auto_expand=True,
     default=None,
 ):
-    """Создать поле внешнего ключа с автоматическим раскрытием по умолчанию."""
-    return _ForeignKey(
+    """Создать связь с автоматическим раскрытием по умолчанию."""
+    return _Relationship(
         model=model,
-        key_field=key_field,
         alias=alias,
         odata_name=odata_name,
         auto_expand=auto_expand,

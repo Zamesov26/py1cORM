@@ -2,22 +2,22 @@ from unittest.mock import Mock
 from uuid import UUID
 
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field
+from py1cORM.models.fields import Field, Mapped
 from py1cORM.odata.expressions import AND
 from py1cORM.odata.fields import like
 from py1cORM.odata.query import QuerySet
 
 
 class NomenclatureModel(ODataModel):
-    uid: UUID = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
-    article: str = Field(alias='Артикул')
-    version: str = Field(alias='DataVersion')
+    uid: Mapped[UUID] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
+    article: Mapped[str] = Field(alias='Артикул')
+    version: Mapped[str] = Field(alias='DataVersion')
 
-    is_folder: bool = Field(alias='IsFolder')
-    is_deleted: bool = Field(alias='DeletionMark')
+    is_folder: Mapped[bool] = Field(alias='IsFolder')
+    is_deleted: Mapped[bool] = Field(alias='DeletionMark')
 
-    unit_measurement_key: str = Field(alias='ЕдиницаИзмерения_Key')
+    unit_measurement_key: Mapped[str] = Field(alias='ЕдиницаИзмерения_Key')
 
     class Meta:
         entity_name = 'Catalog_Номенклатура'

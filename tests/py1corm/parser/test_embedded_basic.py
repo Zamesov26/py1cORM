@@ -2,17 +2,17 @@ import pytest
 
 from py1cORM.exceptions import FieldNotLoadedError
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field
+from py1cORM.models.fields import Field, Mapped
 
 
 class WorkCenterModel(ODataModel):
-    uid: str = Field(alias='ВидРабочегоЦентра_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[str] = Field(alias='ВидРабочегоЦентра_Key')
+    name: Mapped[str] = Field(alias='Description')
 
 
 class ProductStageModel(ODataModel):
-    owner_id: str = Field(alias='Owner_Key')
-    work_centers: list[WorkCenterModel] = Field(alias='ВидыРабочихЦентров')
+    owner_id: Mapped[str] = Field(alias='Owner_Key')
+    work_centers: Mapped[list[WorkCenterModel]] = Field(alias='ВидыРабочихЦентров')
 
 
 def test_builds_entity_when_embedded_value_is_object():

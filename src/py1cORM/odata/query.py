@@ -39,7 +39,7 @@ def kwargs_to_expr(model: type[ODataModel], kwargs: dict[str, object]) -> Expr:
         if not field:
             raise ValueError(f'Unknown field: {field_name}')
 
-        field_ref: FieldRef[object] = FieldRef(model, field)
+        field_ref: FieldRef[ODataModel, object] = FieldRef(model, field)
 
         if lookup == 'eq':
             expr: Expr = BinExpr(field_ref, 'eq', value)

@@ -1,10 +1,20 @@
+import pytest
+
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field
+from py1cORM.models.fields import Field, Mapped, Relationship
 from py1cORM.odata.query import kwargs_to_expr
 
 
 class Employee(ODataModel):
-    name: str = Field()
+    name: Mapped[str] = Field()
+
+
+class Department(ODataModel):
+    name: Mapped[str] = Field()
+
+
+class Assignment(ODataModel):
+    employee: Mapped[Employee | None] = Relationship(model=Employee)
 
 
 def test_builds_contains_function_when_method_is_called():
@@ -35,3 +45,8 @@ def test_builds_endswith_function_when_lookup_is_given():
     expr = kwargs_to_expr(Employee, {'name__endswith': 'Ivan'})
 
     assert expr.to_odata() == "endswith(name, 'Ivan')"
+
+
+def test_rejects_field_from_unrelated_model_when_path_is_built():
+    with pytest.raises(ValueError, match='belongs to Department, expected Employee'):
+        Assignment.employee.then(Department.name)  # type: ignore[arg-type]

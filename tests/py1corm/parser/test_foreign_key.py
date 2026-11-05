@@ -1,24 +1,26 @@
+from uuid import UUID
+
 import pytest
 
 from py1cORM.exceptions import FieldNotLoadedError
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field, ForeignKey
+from py1cORM.models.fields import Field, Mapped, Relationship
 
 
 class WorkCenterModel(ODataModel):
-    uid: str = Field(alias='ВидРабочегоЦентра_Key')
+    uid: Mapped[str] = Field(alias='ВидРабочегоЦентра_Key')
 
 
 class ProductStageModel(ODataModel):
-    owner_id: str = Field(alias='Owner_Key')
-    work_centers: list[WorkCenterModel] = Field(alias='ВидыРабочихЦентров')
+    owner_id: Mapped[str] = Field(alias='Owner_Key')
+    work_centers: Mapped[list[WorkCenterModel]] = Field(alias='ВидыРабочихЦентров')
 
 
 class ResourceSpecificationsModel(ODataModel):
-    product_stage: ProductStageModel | None = ForeignKey(
+    product_stage_id: Mapped[UUID | None] = Field(alias='ОсновноеИзделиеЭтап_Key')
+    product_stage: Mapped[ProductStageModel | None] = Relationship(
         model=ProductStageModel,
         alias='ОсновноеИзделиеЭтап',
-        key_field='ОсновноеИзделиеЭтап_Key',
     )
 
 
@@ -27,8 +29,8 @@ def test_contains_key_only_when_relation_is_not_expanded():
 
     entity = ResourceSpecificationsModel.from_raw(raw)
 
-    assert entity.product_stage.has_key()
-    assert entity.product_stage.is_loaded() is False
+    assert entity.product_stage_id == UUID('550e8400-e29b-41d4-a716-446655440000')
+    assert not entity.is_loaded('product_stage')
 
 
 def test_contains_entity_when_relation_is_expanded():
@@ -42,8 +44,8 @@ def test_contains_entity_when_relation_is_expanded():
 
     entity = ResourceSpecificationsModel.from_raw(raw)
 
-    assert entity.product_stage.has_key()
-    assert entity.product_stage.is_loaded()
+    assert entity.product_stage_id == UUID('550e8400-e29b-41d4-a716-446655440000')
+    assert entity.product_stage is not None
 
 
 def test_marks_relation_not_loaded_when_key_and_entity_are_absent():

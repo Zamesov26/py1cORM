@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field
+from py1cORM.models.fields import Field, Mapped
 
 # --------------------------------
 # Тестовая модель
@@ -9,8 +9,8 @@ from py1cORM.models.fields import Field
 
 
 class TestModel(ODataModel):
-    uid: UUID = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[UUID] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
 
 
 # --------------------------------

@@ -1,14 +1,13 @@
 """Ссылки на поля моделей для путей, сравнений и функций OData."""
 
+from __future__ import annotations
+
 from collections.abc import Iterable
-from typing import TypeVar
 
 from py1cORM.odata.expressions import BinExpr, FuncExpr, InExpr
 
-T = TypeVar('T')
 
-
-class FieldRef[T]:
+class FieldRef[ModelT, T]:
     """Ссылка на поле или цепочку связанных полей модели OData."""
 
     def __init__(self, model, field_or_fields):
@@ -47,55 +46,38 @@ class FieldRef[T]:
         """Построить проверку принадлежности поля коллекции значений."""
         return InExpr(self, values)
 
-    def __getattr__(self, item):
-        # --- операции над полем ---
-        # if item == 'contains':
-        #     return lambda value: FuncExpr('contains', self, value)
-        #
-        # if item == 'in_':
-        #     return lambda values: InExpr(self, values)
-        #
-        # if item == 'startswith':
-        #     return lambda \
-        #         value: FuncExpr('startswith', self, value)
-        #
-        # if item == 'endswith':
-        #     return lambda \
-        #         value: FuncExpr('endswith', self, value)
+    def then[RelatedT, U](
+        self: FieldRef[ModelT, RelatedT | None],
+        next_ref: FieldRef[RelatedT, U],
+    ) -> FieldRef[RelatedT, U]:
+        """Продолжить путь полем целевой модели отношения."""
+        terminal = self.field
+        if not terminal.is_relation:
+            raise AttributeError(f"Cannot traverse scalar field '{terminal.attr_name}'")
+        target_model = terminal.get_related_model()
+        if next_ref.model is not target_model:
+            raise ValueError(
+                f'{next_ref.path} belongs to {next_ref.model.__name__}, '
+                f'expected {target_model.__name__}'
+            )
+        return FieldRef(next_ref.model, self.fields + next_ref.fields)
 
-        # --- переход по relation ---
-        field = self.field
-
-        if not field.is_relation:
-            raise AttributeError(f"Cannot traverse scalar field '{field.attr_name}'")
-
-        target_model = field.get_related_model()
-
-        next_field = target_model._fields.get(item)
-        if not next_field:
-            raise AttributeError(f'{item} not found in {target_model.__name__}')
-
-        return FieldRef(
-            target_model,
-            self.fields + [next_field],
-        )
-
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> BinExpr:  # type: ignore[override]
         return BinExpr(self, 'eq', other)
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> BinExpr:  # type: ignore[override]
         return BinExpr(self, 'ne', other)
 
-    def __gt__(self, other):
+    def __gt__(self, other: object) -> BinExpr:
         return BinExpr(self, 'gt', other)
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> BinExpr:
         return BinExpr(self, 'lt', other)
 
-    def __ge__(self, other):
+    def __ge__(self, other: object) -> BinExpr:
         return BinExpr(self, 'ge', other)
 
-    def __le__(self, other):
+    def __le__(self, other: object) -> BinExpr:
         return BinExpr(self, 'le', other)
 
 

@@ -4,7 +4,7 @@ import pytest
 
 from py1cORM.exceptions import FieldNotLoadedError
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field, ForeignKey
+from py1cORM.models.fields import Field, Mapped, Relationship
 
 # ---------------------------
 # Тестовые модели
@@ -12,22 +12,22 @@ from py1cORM.models.fields import Field, ForeignKey
 
 
 class WorkCenterModel(ODataModel):
-    uid: UUID | None = Field(alias='ВидРабочегоЦентра_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[UUID | None] = Field(alias='ВидРабочегоЦентра_Key')
+    name: Mapped[str] = Field(alias='Description')
 
 
 class ProductStageModel(ODataModel):
-    owner_id: UUID | None = Field(alias='Owner_Key')
-    work_centers: list[WorkCenterModel] = Field(alias='ВидыРабочихЦентров')
+    owner_id: Mapped[UUID | None] = Field(alias='Owner_Key')
+    work_centers: Mapped[list[WorkCenterModel]] = Field(alias='ВидыРабочихЦентров')
 
 
 class ResourceSpecificationsModel(ODataModel):
-    name: str = Field(alias='Description')
+    name: Mapped[str] = Field(alias='Description')
 
-    product_stage: ProductStageModel | None = ForeignKey(
+    product_stage_id: Mapped[UUID | None] = Field(alias='ОсновноеИзделиеЭтап_Key')
+    product_stage: Mapped[ProductStageModel | None] = Relationship(
         model=ProductStageModel,
         alias='ОсновноеИзделиеЭтап',
-        key_field='ОсновноеИзделиеЭтап_Key',
     )
 
 
@@ -66,11 +66,12 @@ def test_builds_complete_graph_when_nested_relations_are_present():
     # --- extra root
     assert entity.extra() == {'ExtraRootField': 123}
 
-    # --- FK key
-    assert entity.product_stage.id == UUID('550e8400-e29b-41d4-a716-446655440000')
+    # --- relationship key
+    assert entity.product_stage_id == UUID('550e8400-e29b-41d4-a716-446655440000')
 
-    # --- FK expand
+    # --- relationship expand
     stage = entity.product_stage
+    assert stage is not None
     assert stage.owner_id == UUID('11111111-1111-1111-1111-111111111111')
 
     # --- nested list
