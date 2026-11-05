@@ -31,7 +31,7 @@ class DummyModel:
         return raw
 
 
-def test_batched_returns_all_items_in_batches():
+def test_returns_all_items_when_collection_spans_multiple_batches():
     data = list(range(250))
 
     client = DummyClient(data)
@@ -52,7 +52,7 @@ def test_batched_returns_all_items_in_batches():
     assert flat == data
 
 
-def test_iterator_calls_with_correct_pagination():
+def test_requests_sequential_offsets_when_iterating_batches():
     data = list(range(250))
 
     client = DummyClient(data)
@@ -68,7 +68,7 @@ def test_iterator_calls_with_correct_pagination():
     ]
 
 
-def test_batched_stops_on_empty_batch():
+def test_stops_iteration_when_server_returns_empty_batch():
     data = list(range(50))
 
     client = DummyClient(data)
@@ -89,7 +89,7 @@ def test_batched_stops_on_empty_batch():
     assert flat == data
 
 
-def test_batched_with_exact_multiple_of_batch():
+def test_returns_complete_batches_when_size_is_exact_multiple():
     data = list(range(200))
 
     client = DummyClient(data)
@@ -110,7 +110,7 @@ def test_batched_with_exact_multiple_of_batch():
     assert flat == data
 
 
-def test_batched_waits_between_requests():
+def test_waits_between_requests_when_delay_is_positive():
     client = DummyClient(list(range(3)))
     qs = QuerySet(client, DummyModel)
 
@@ -121,7 +121,7 @@ def test_batched_waits_between_requests():
     assert sleep.call_args_list == [call(0.5), call(0.5)]
 
 
-def test_batched_rejects_negative_delay():
+def test_rejects_iteration_when_delay_is_negative():
     qs = QuerySet(DummyClient([]), DummyModel)
 
     with pytest.raises(ValueError, match='Delay cannot be negative'):

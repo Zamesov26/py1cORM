@@ -21,7 +21,7 @@ class Product(ODataModel):
 RAW = {}
 
 
-def test_expand_only_not_loaded():
+def test_marks_field_not_loaded_when_expand_only_value_is_absent():
 
     entity = Product.from_raw(RAW)
 
@@ -29,7 +29,7 @@ def test_expand_only_not_loaded():
         _ = entity.nomenclature
 
 
-def test_expand_only_loaded():
+def test_loads_field_when_expand_only_value_is_present():
 
     raw = {'Номенклатура': {'Ref_Key': '123', 'Description': 'Test product'}}
 
@@ -38,7 +38,7 @@ def test_expand_only_loaded():
     assert entity.nomenclature.name == 'Test product'
 
 
-def test_expand_only_null():
+def test_loads_none_when_expand_only_value_is_null():
 
     raw = {'Номенклатура': None}
 

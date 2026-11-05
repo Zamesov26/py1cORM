@@ -6,7 +6,7 @@ class TestModel(ODataModel):
     uid: str = Field(alias='Ref_Key')
 
 
-def test_extra_fields_collected():
+def test_collects_unknown_values_when_parsing_entity():
     raw = {
         'Ref_Key': '123',
         'Unknown': 'X',

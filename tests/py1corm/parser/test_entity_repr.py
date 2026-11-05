@@ -15,7 +15,7 @@ class DefaultModel(ODataModel):
         pk = 'uid'
 
 
-def test_default_repr_shows_loaded_fields():
+def test_shows_loaded_fields_when_repr_configuration_is_absent():
     raw = {
         'Ref_Key': '123',
         'Description': 'TestName',
@@ -44,7 +44,7 @@ class ReprFieldsModel(ODataModel):
         repr_fields = ['uid', 'name']
 
 
-def test_repr_fields_only_prints_selected_fields():
+def test_shows_selected_fields_when_repr_fields_are_configured():
     raw = {
         'Ref_Key': '123',
         'Description': 'TestName',
@@ -76,7 +76,7 @@ class StrOverrideModel(ODataModel):
         return f'{self.name}'
 
 
-def test_str_override_is_used_in_repr():
+def test_uses_model_string_when_string_method_is_overridden():
     raw = {
         'Ref_Key': '123',
         'Description': 'TestName',
@@ -106,7 +106,7 @@ class StrAndReprFieldsModel(ODataModel):
         return 'STR_PRIORITY'
 
 
-def test_str_has_priority_over_repr_fields():
+def test_prefers_model_string_when_repr_fields_are_also_configured():
     raw = {
         'Ref_Key': '123',
         'Description': 'TestName',

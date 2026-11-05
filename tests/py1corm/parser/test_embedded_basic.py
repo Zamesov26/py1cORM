@@ -15,7 +15,7 @@ class ProductStageModel(ODataModel):
     work_centers: list[WorkCenterModel] = Field(alias='ВидыРабочихЦентров')
 
 
-def test_embedded_single_object():
+def test_builds_entity_when_embedded_value_is_object():
 
     raw = {
         'Owner_Key': '550e8400-e29b-41d4-a716-446655440000',
@@ -28,7 +28,7 @@ def test_embedded_single_object():
     assert entity.work_centers == []
 
 
-def test_embedded_list():
+def test_builds_entities_when_embedded_value_is_list():
 
     raw = {
         'Owner_Key': '550e8400-e29b-41d4-a716-446655440000',
@@ -51,7 +51,7 @@ def test_embedded_list():
     assert entity.work_centers[0].name == 'description_1'
 
 
-def test_nested_not_loaded():
+def test_marks_nested_field_not_loaded_when_value_is_absent():
 
     raw = {'Owner_Key': '550e8400-e29b-41d4-a716-446655440000'}
 
@@ -63,7 +63,7 @@ def test_nested_not_loaded():
         _ = entity.work_centers
 
 
-def test_nested_extra_fields():
+def test_preserves_extra_fields_when_nested_value_contains_unknown_data():
 
     raw = {
         'Owner_Key': '550e8400-e29b-41d4-a716-446655440000',

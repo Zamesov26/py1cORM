@@ -14,7 +14,7 @@ class NomenclatureModel(ODataModel):
         entity_name = 'Catalog_Номенклатура'
 
 
-def test_like_filter_builds_correct_query():
+def test_builds_like_filter_when_pattern_is_given():
     expr = like(NomenclatureModel.name, 'Стакан%')
 
     qs = QuerySet(client=None, model=NomenclatureModel).filter(expr)

@@ -23,7 +23,7 @@ class NomenclatureModel(ODataModel):
         entity_name = 'Catalog_Номенклатура'
 
 
-def test_batched_builds_filter_and_pagination():
+def test_preserves_filter_when_loading_paginated_batches():
     client = Mock()
 
     client.get_collection.side_effect = [

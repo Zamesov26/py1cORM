@@ -11,7 +11,7 @@ class TestModel(ODataModel):
     name: str = Field(alias='Description')
 
 
-def test_entity_sets_loaded_fields():
+def test_marks_fields_loaded_when_values_are_present():
     raw = {'Ref_Key': '123'}
 
     entity = TestModel.from_raw(raw)
@@ -22,7 +22,7 @@ def test_entity_sets_loaded_fields():
     assert entity.is_loaded('name') is False
 
 
-def test_extra_fields_collected():
+def test_collects_extra_fields_when_response_contains_unknown_data():
     raw = {
         'Ref_Key': '123',
         'Unexpected': 42,
@@ -33,7 +33,7 @@ def test_extra_fields_collected():
     assert entity._extra == {'Unexpected': 42}
 
 
-def test_access_not_loaded_field_raises():
+def test_raises_when_accessing_field_absent_from_response():
     raw = {'Ref_Key': '123'}
 
     entity = TestModel.from_raw(raw)

@@ -8,14 +8,14 @@ class DummyClient:
         return []
 
 
-def test_without_select_fields():
+def test_leaves_select_unset_when_fields_are_not_given():
     qs = QuerySet(DummyClient(), Product)
     qs._finalize_defaults()
 
     assert qs.spec.select is None
 
 
-def test_explicit_select_override():
+def test_uses_explicit_fields_when_select_is_called():
     qs = QuerySet(DummyClient(), Product)
     qs = qs.select('name')
     qs._finalize_defaults()

@@ -36,7 +36,7 @@ class ResourceSpecificationsModel(ODataModel):
 # ---------------------------
 
 
-def test_full_graph_parsing():
+def test_builds_complete_graph_when_nested_relations_are_present():
 
     raw = {
         'Description': 'Specification A',

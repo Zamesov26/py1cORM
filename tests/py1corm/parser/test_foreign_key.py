@@ -22,7 +22,7 @@ class ResourceSpecificationsModel(ODataModel):
     )
 
 
-def test_fk_only_key():
+def test_contains_key_only_when_relation_is_not_expanded():
     raw = {'ОсновноеИзделиеЭтап_Key': '550e8400-e29b-41d4-a716-446655440000'}
 
     entity = ResourceSpecificationsModel.from_raw(raw)
@@ -31,7 +31,7 @@ def test_fk_only_key():
     assert entity.product_stage.is_loaded() is False
 
 
-def test_fk_with_expand():
+def test_contains_entity_when_relation_is_expanded():
     raw = {
         'ОсновноеИзделиеЭтап_Key': '550e8400-e29b-41d4-a716-446655440000',
         'ОсновноеИзделиеЭтап': {
@@ -46,7 +46,7 @@ def test_fk_with_expand():
     assert entity.product_stage.is_loaded()
 
 
-def test_fk_not_loaded():
+def test_marks_relation_not_loaded_when_key_and_entity_are_absent():
     raw = {}
 
     entity = ResourceSpecificationsModel.from_raw(raw)

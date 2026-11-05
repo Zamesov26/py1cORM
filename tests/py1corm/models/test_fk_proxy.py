@@ -34,21 +34,21 @@ class Dummy:
         return iter(self.items)
 
 
-def test_fk_proxy_attribute_access():
+def test_proxies_attribute_when_related_entity_is_loaded():
     entity = Dummy()
     fk = FK(key=1, entity=entity)
 
     assert fk.value == 42
 
 
-def test_fk_proxy_not_loaded_attribute():
+def test_rejects_attribute_access_when_related_entity_is_not_loaded():
     fk = FK(key=1, entity=None)
 
     with pytest.raises(AttributeError):
         _ = fk.value
 
 
-def test_entity_fk_proxy_access():
+def test_proxies_related_attribute_when_entity_contains_foreign_key():
     raw = {'Ref_Key': '123', 'Related': {'value': 10}}
 
     obj = SomeModel.from_raw(raw)

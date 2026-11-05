@@ -88,7 +88,7 @@ RAW_RESPONSE = {
 }
 
 
-def test_real_1c_response_parsing():
+def test_builds_expected_graph_when_parsing_realistic_response():
     items = [
         ResourceSpecificationsModel.from_raw(item) for item in RAW_RESPONSE['value']
     ]

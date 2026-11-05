@@ -8,7 +8,7 @@ class DummyClient:
         return []
 
 
-def test_filter_expr():
+def test_stores_serialized_filter_when_expression_is_given():
     qs = QuerySet(DummyClient(), Product)
     qs = qs.filter(Product.category.parent.name == 'X')
     qs._finalize_defaults()
@@ -16,7 +16,7 @@ def test_filter_expr():
     assert qs.spec.filter == "Category/Parent/Name eq 'X'"
 
 
-def test_filter_raw_string():
+def test_stores_filter_unchanged_when_raw_string_is_given():
     qs = QuerySet(DummyClient(), Product)
     qs = qs.filter("Category/Parent/Name eq 'X'")
     qs._finalize_defaults()
