@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "py1cORM"
-version = "0.1.0"
+version = "1.0.0"
 authors = [
   { name="Oleg Zamesov", email="o.zamesov@yandex.ru" },
 ]
