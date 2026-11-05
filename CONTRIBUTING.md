@@ -16,6 +16,12 @@ ruff check .
 pytest -q
 ```
 
+Для измерения покрытия выполните:
+
+```shell
+pytest -q --cov=src/py1cORM --cov-report=term-missing:skip-covered
+```
+
 ## Коммиты
 
 Проект использует Conventional Commits:
