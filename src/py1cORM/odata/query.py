@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass
 from time import sleep
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 from py1cORM.odata.expressions import AndExpr, BinExpr, Expr, FuncExpr
 from py1cORM.odata.fields import FieldRef
@@ -25,9 +25,9 @@ LOOKUP_MAP = {
 }
 
 
-def kwargs_to_expr(model, kwargs: dict):
+def kwargs_to_expr(model: type[ODataModel], kwargs: dict[str, object]) -> Expr:
     """Преобразовать именованные lookup-условия в выражение OData."""
-    expressions = []
+    expressions: list[Expr] = []
 
     for key, value in kwargs.items():
         parts = key.split('__')
@@ -39,10 +39,10 @@ def kwargs_to_expr(model, kwargs: dict):
         if not field:
             raise ValueError(f'Unknown field: {field_name}')
 
-        field_ref = FieldRef(model, field)
+        field_ref: FieldRef[ODataModel, object] = FieldRef(model, field)
 
         if lookup == 'eq':
-            expr = BinExpr(field_ref, 'eq', value)
+            expr: Expr = BinExpr(field_ref, 'eq', value)
 
         elif lookup == 'contains':
             expr = FuncExpr('contains', field_ref, value)
@@ -83,10 +83,7 @@ class QuerySpec:
     count: bool | None = None
 
 
-T = TypeVar('T', bound='ODataModel')
-
-
-class QuerySet[T]:
+class QuerySet[T: ODataModel]:
     """Построитель запросов и загрузчик сущностей указанной модели."""
 
     def __init__(self, client, model: type[T], spec: QuerySpec | None = None):
@@ -98,19 +95,19 @@ class QuerySet[T]:
         """Создать независимую копию текущей спецификации запроса."""
         return QuerySet(self.client, self.model, deepcopy(self.spec))
 
-    def select(self, *fields):
+    def select(self, *fields: object) -> QuerySet[T]:
         """Ограничить ответ указанными полями модели."""
         qs = self.clone()
         qs.spec.select = [field_to_path(self.model, f) for f in fields]
         return qs
 
-    def expand(self, *fields) -> QuerySet[T]:
+    def expand(self, *fields: object) -> QuerySet[T]:
         """Добавить раскрытие указанных связей через ``$expand``."""
         qs = self.clone()
         qs.spec.expand = [field_to_path(self.model, f) for f in fields]
         return qs
 
-    def filter(self, *conditions) -> QuerySet[T]:
+    def filter(self, *conditions: object) -> QuerySet[T]:
         """Добавить выражение или готовую строку фильтра OData."""
         serialized = []
 
@@ -129,7 +126,7 @@ class QuerySet[T]:
             qs.spec.filter = f'({" and ".join(serialized)})'
         return qs
 
-    def order_by(self, *fields) -> QuerySet[T]:
+    def order_by(self, *fields: object) -> QuerySet[T]:
         """Задать порядок результатов по полям и направлениям сортировки."""
         qs = self.clone()
         qs.spec.orderby = [order_to_odata(self.model, f) for f in fields]
@@ -152,7 +149,7 @@ class QuerySet[T]:
                 pk_field = self.model._fields[pk_name]
                 pk_odata = pk_field.odata_name
 
-                if pk_odata not in self.spec.select:
+                if pk_odata is not None and pk_odata not in self.spec.select:
                     self.spec.select.append(pk_odata)
 
     def all(self) -> list[T]:
@@ -196,7 +193,7 @@ class QuerySet[T]:
             yield batch
             skip += batch_size
 
-    def get(self, **kwargs):
+    def get(self, **kwargs: object) -> T:
         """Получить единственную сущность по именованным условиям.
 
         Raises:

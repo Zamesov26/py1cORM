@@ -1,11 +1,11 @@
 from uuid import UUID
 
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field, ForeignKey
+from py1cORM.models.fields import Field, Mapped, Relationship
 
 
 class Parent(ODataModel):
-    name: str = Field(alias='Name')
+    name: Mapped[str] = Field(alias='Name')
 
     class Meta:
         entity_name = 'Parents'
@@ -13,12 +13,12 @@ class Parent(ODataModel):
 
 
 class Category(ODataModel):
-    name: str = Field(alias='Name')
+    name: Mapped[str] = Field(alias='Name')
 
-    parent: Parent | None = ForeignKey(
+    parent_id: Mapped[UUID | None] = Field(alias='Parent_Key')
+    parent: Mapped[Parent | None] = Relationship(
         model=Parent,
         alias='Parent',
-        key_field='Parent_Key',  # ВАЖНО
     )
 
     class Meta:
@@ -27,13 +27,13 @@ class Category(ODataModel):
 
 
 class Product(ODataModel):
-    uid_1c: UUID = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
+    uid_1c: Mapped[UUID] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
 
-    category: Category | None = ForeignKey(
+    category_id: Mapped[UUID | None] = Field(alias='Category_Key')
+    category: Mapped[Category | None] = Relationship(
         model=Category,
         alias='Category',
-        key_field='Category_Key',  # ВАЖНО
     )
 
     class Meta:

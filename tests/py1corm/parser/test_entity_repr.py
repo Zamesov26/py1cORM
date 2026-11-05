@@ -1,5 +1,5 @@
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field
+from py1cORM.models.fields import Field, Mapped
 
 # -----------------------------
 # 1 Дефолтное поведение
@@ -7,8 +7,8 @@ from py1cORM.models.fields import Field
 
 
 class DefaultModel(ODataModel):
-    uid: str = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[str] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
 
     class Meta:
         entity_name = 'Test'
@@ -35,9 +35,9 @@ def test_shows_loaded_fields_when_repr_configuration_is_absent():
 
 
 class ReprFieldsModel(ODataModel):
-    uid: str = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
-    extra: str = Field(alias='Extra')
+    uid: Mapped[str] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
+    extra: Mapped[str] = Field(alias='Extra')
 
     class Meta:
         entity_name = 'Test'
@@ -66,8 +66,8 @@ def test_shows_selected_fields_when_repr_fields_are_configured():
 
 
 class StrOverrideModel(ODataModel):
-    uid: str = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[str] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
 
     class Meta:
         entity_name = 'Test'
@@ -95,8 +95,8 @@ def test_uses_model_string_when_string_method_is_overridden():
 
 
 class StrAndReprFieldsModel(ODataModel):
-    uid: str = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[str] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
 
     class Meta:
         entity_name = 'Test'
@@ -107,6 +107,7 @@ class StrAndReprFieldsModel(ODataModel):
 
 
 def test_prefers_model_string_when_repr_fields_are_also_configured():
+    """Пользовательский ``__str__`` должен иметь приоритет над ``repr_fields``."""
     raw = {
         'Ref_Key': '123',
         'Description': 'TestName',

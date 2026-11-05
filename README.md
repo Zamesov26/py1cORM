@@ -11,7 +11,7 @@ OData-параметры (`$select`, `$expand`, `$filter`, `$orderby`, `$top`, `
 ## Возможности
 
 - декларативные модели и псевдонимы полей 1С;
-- обычные, вложенные и связанные поля (`Field`, `Embedded`, `ForeignKey`);
+- обычные, вложенные и связанные поля (`Field`, `Embedded`, `Relationship`);
 - типизированное преобразование значений, включая UUID и даты;
 - выбор отдельных полей и раскрытие связей;
 - фильтры через Python-выражения или raw OData;
@@ -48,19 +48,25 @@ from py1cORM import __version__
 ### 1. Опишите модель
 
 `alias` — имя поля в OData 1С, а `entity_name` — имя набора сущностей.
+`Mapped[T]` отмечает управляемое ORM-поле: у экземпляра модели оно имеет тип
+`T`, а при обращении через класс возвращает типизированную ссылку для запроса.
+Все поля модели должны использовать эту форму; прежняя запись
+`uid: UUID = Field(...)` не поддерживается и завершается ошибкой при создании
+класса.
 
 ```python
 from uuid import UUID
 
+from py1cORM import Mapped
 from py1cORM.models.base import ODataModel
 from py1cORM.models.fields import Field
 
 
 class Nomenclature(ODataModel):
-    uid: UUID = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
-    article: str = Field(alias='Артикул')
-    is_deleted: bool = Field(alias='DeletionMark')
+    uid: Mapped[UUID] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
+    article: Mapped[str] = Field(alias='Артикул')
+    is_deleted: Mapped[bool] = Field(alias='DeletionMark')
 
     class Meta:
         entity_name = 'Catalog_Номенклатура'
@@ -221,27 +227,29 @@ item = query.get(name__startswith='Стакан')
 
 ## Связи и вложенные данные
 
-### ForeignKey
+### Relationship
 
 ```python
-from py1cORM.models.fields import ForeignKey
+from py1cORM.models.fields import Relationship
 
 
 class Category(ODataModel):
-    uid: UUID = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[UUID] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
 
     class Meta:
         entity_name = 'Catalog_КатегорииНоменклатуры'
 
 
 class Product(ODataModel):
-    uid: UUID = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
-    category: Category | None = ForeignKey(
+    uid: Mapped[UUID] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
+    category_id: Mapped[UUID | None] = Field(
+        alias='КатегорияНоменклатуры_Key',
+    )
+    category: Mapped[Category | None] = Relationship(
         model=Category,
         alias='КатегорияНоменклатуры',
-        key_field='КатегорияНоменклатуры_Key',
     )
 
     class Meta:
@@ -254,17 +262,28 @@ class Product(ODataModel):
 products = Product.using(connection).expand(Product.category).all()
 
 for product in products:
-    if product.is_loaded('category') and product.category.is_loaded():
+    print(product.category_id)
+    if product.is_loaded('category') and product.category is not None:
         print(product.category.name)
 ```
 
-У `ForeignKey` отдельно доступны ключ связи и загруженная сущность. Если
-`$expand` не использовался, объект связи может содержать только ключ.
+Ключ и раскрытая сущность объявляются разными атрибутами. Поэтому ключ доступен
+без `$expand`, а тип связи прямо отражает значение атрибута: `Category | None`.
+Если связь не была запрошена через `$expand`, обращение к ней вызывает
+`FieldNotLoadedError`.
 
 По связанным полям также можно строить OData-пути:
 
 ```python
-Product.using(connection).filter(Product.category.name == 'Посуда').all()
+Product.using(connection).filter(Product.category.then(Category.name) == 'Посуда').all()
+```
+
+Метод `then()` явно связывает две типизированные ссылки и проверяет, что второе
+поле принадлежит целевой модели отношения. Для более глубокого пути вызовы
+соединяются последовательно:
+
+```python
+Product.category.then(Category.parent).then(Parent.name)
 ```
 
 ### Embedded
@@ -276,13 +295,13 @@ from py1cORM.models.fields import Embedded
 
 
 class Row(ODataModel):
-    product_key: UUID = Field(alias='Номенклатура_Key')
-    quantity: float = Field(alias='Количество')
+    product_key: Mapped[UUID] = Field(alias='Номенклатура_Key')
+    quantity: Mapped[float] = Field(alias='Количество')
 
 
 class Document(ODataModel):
-    uid: UUID = Field(alias='Ref_Key')
-    rows: list[Row] = Embedded(model=Row, alias='Товары')
+    uid: Mapped[UUID] = Field(alias='Ref_Key')
+    rows: Mapped[list[Row]] = Embedded(model=Row, alias='Товары')
 
     class Meta:
         entity_name = 'Document_РеализацияТоваровУслуг'
@@ -303,10 +322,12 @@ for item in query.all():
 в CI:
 
 ```shell
-ruff format --check .
-ruff check .
-pytest -q
+make check
 ```
+
+Установка инструментов разработки выполняется командой `make install`,
+автоматическое форматирование — `make format`. Остальные доступные цели
+описаны в [`Makefile`](Makefile).
 
 GitHub Actions запускает проверки для pull request и после попадания изменений
 в `main`. Прямые push в `main` запрещены; рабочий процесс с короткими ветками

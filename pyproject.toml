@@ -30,15 +30,23 @@ AuthorGitHub = "https://github.com/Zamesov26"
 
 [project.optional-dependencies]
 dev = [
+    "build>=1,<2",
+    "mypy>=1.19,<2",
+    "pyright>=1.1,<2",
     "python-semantic-release>=10.7,<11",
     "pytest>=9.1,<10",
     "pytest-cov>=7,<8",
     "ruff==0.16.1",
+    "types-python-dateutil>=2.9",
+    "types-requests>=2.32",
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["py1cORM*"]
+
+[tool.setuptools.package-data]
+py1cORM = ["py.typed"]
 
 [tool.ruff]
 line-length = 88
@@ -94,12 +102,29 @@ docstring-quotes = "double"
 inline-quotes = "single"
 multiline-quotes = "double"
 
+[tool.mypy]
+python_version = "3.12"
+files = ["src/py1cORM", "tests/typecheck"]
+mypy_path = ["src"]
+explicit_package_bases = true
+check_untyped_defs = true
+no_implicit_optional = true
+show_error_codes = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+
+[tool.pyright]
+include = ["tests/typecheck"]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+
 [tool.semantic_release]
 commit_parser = "conventional"
 version_toml = ["pyproject.toml:project.version"]
 tag_format = "v{version}"
 allow_zero_version = true
-major_on_zero = false
+major_on_zero = true
 commit_message = "chore(release): {version}"
 
 [tool.semantic_release.branches.main]

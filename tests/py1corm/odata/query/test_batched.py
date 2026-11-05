@@ -32,6 +32,7 @@ class DummyModel:
 
 
 def test_returns_all_items_when_collection_spans_multiple_batches():
+    """Проверить отсутствие потерь данных на границах нескольких страниц."""
     data = list(range(250))
 
     client = DummyClient(data)
@@ -53,6 +54,7 @@ def test_returns_all_items_when_collection_spans_multiple_batches():
 
 
 def test_requests_sequential_offsets_when_iterating_batches():
+    """Проверить смещения страниц и завершающий запрос за пустой страницей."""
     data = list(range(250))
 
     client = DummyClient(data)
@@ -90,6 +92,7 @@ def test_stops_iteration_when_server_returns_empty_batch():
 
 
 def test_returns_complete_batches_when_size_is_exact_multiple():
+    """Не возвращать лишнюю страницу, когда объём кратен размеру пакета."""
     data = list(range(200))
 
     client = DummyClient(data)
@@ -111,6 +114,7 @@ def test_returns_complete_batches_when_size_is_exact_multiple():
 
 
 def test_waits_between_requests_when_delay_is_positive():
+    """Делать паузу только между запросами, включая запрос завершения."""
     client = DummyClient(list(range(3)))
     qs = QuerySet(client, DummyModel)
 

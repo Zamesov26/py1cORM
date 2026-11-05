@@ -1,9 +1,9 @@
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field
+from py1cORM.models.fields import Field, Mapped
 
 
 class TestModel(ODataModel):
-    uid: str = Field(alias='Ref_Key')
+    uid: Mapped[str] = Field(alias='Ref_Key')
 
 
 def test_collects_unknown_values_when_parsing_entity():

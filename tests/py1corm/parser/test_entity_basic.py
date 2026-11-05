@@ -2,13 +2,13 @@ import pytest
 
 from py1cORM.exceptions import FieldNotLoadedError
 from py1cORM.models.base import ODataModel
-from py1cORM.models.fields import Field
+from py1cORM.models.fields import Field, Mapped
 from py1cORM.parser.sentinels import NotLoaded
 
 
 class TestModel(ODataModel):
-    uid: str = Field(alias='Ref_Key')
-    name: str = Field(alias='Description')
+    uid: Mapped[str] = Field(alias='Ref_Key')
+    name: Mapped[str] = Field(alias='Description')
 
 
 def test_marks_fields_loaded_when_values_are_present():
