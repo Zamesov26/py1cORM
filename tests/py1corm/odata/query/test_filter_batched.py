@@ -24,6 +24,7 @@ class NomenclatureModel(ODataModel):
 
 
 def test_preserves_filter_when_loading_paginated_batches():
+    """Проверить сохранение фильтра при клонировании запроса для каждой страницы."""
     client = Mock()
 
     client.get_collection.side_effect = [

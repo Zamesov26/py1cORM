@@ -40,6 +40,7 @@ def test_uses_guid_literal_when_comparing_uuid_string():
 
 
 def test_uses_field_type_when_contains_receives_uuid_values():
+    """Сериализовать строковое значение как GUID с учётом типа поля."""
     expr = TestModel.uid.contains('e801089b-c75b-11ed-aa56-ac1f6bd30991')
 
     result = expr.to_odata()
@@ -74,6 +75,7 @@ def test_serializes_each_guid_when_uuid_collection_is_given():
 
 
 def test_keeps_string_literal_when_field_annotation_is_string():
+    """Не применять GUID-сериализацию к строке с форматом UUID без UUID-поля."""
     expr = TestModel.name == 'Test'
 
     result = expr.to_odata()

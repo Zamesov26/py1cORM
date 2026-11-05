@@ -26,6 +26,7 @@ def test_encodes_query_parameters_when_building_url():
 
 
 def test_reuses_and_closes_session_when_context_manager_is_used():
+    """Контекст должен переиспользовать одну сессию и закрывать её при выходе."""
     session = Mock(spec=requests.Session)
     connection = make_connection()
 
@@ -40,6 +41,7 @@ def test_reuses_and_closes_session_when_context_manager_is_used():
 
 
 def test_sends_request_with_timeout_when_temporary_session_is_used():
+    """Одиночный запрос должен закрыть созданную для него временную сессию."""
     response = Mock(spec=requests.Response)
     session = Mock(spec=requests.Session)
     session.prepare_request.return_value = Mock()

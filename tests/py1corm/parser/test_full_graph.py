@@ -37,7 +37,7 @@ class ResourceSpecificationsModel(ODataModel):
 
 
 def test_builds_complete_graph_when_nested_relations_are_present():
-
+    """Проверить полный граф и состояние незагруженной связи одним сценарием."""
     raw = {
         'Description': 'Specification A',
         'ОсновноеИзделиеЭтап_Key': '550e8400-e29b-41d4-a716-446655440000',

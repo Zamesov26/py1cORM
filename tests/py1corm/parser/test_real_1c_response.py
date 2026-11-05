@@ -89,6 +89,7 @@ RAW_RESPONSE = {
 
 
 def test_builds_expected_graph_when_parsing_realistic_response():
+    """Проверить совместную обработку вложений, связей и лишних полей ответа 1С."""
     items = [
         ResourceSpecificationsModel.from_raw(item) for item in RAW_RESPONSE['value']
     ]

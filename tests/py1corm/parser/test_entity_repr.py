@@ -107,6 +107,7 @@ class StrAndReprFieldsModel(ODataModel):
 
 
 def test_prefers_model_string_when_repr_fields_are_also_configured():
+    """Пользовательский ``__str__`` должен иметь приоритет над ``repr_fields``."""
     raw = {
         'Ref_Key': '123',
         'Description': 'TestName',
