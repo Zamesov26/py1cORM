@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 from tests.models import Product
 
 from py1cORM.odata.query import QuerySet
@@ -21,3 +23,21 @@ def test_uses_explicit_fields_when_select_is_called():
     qs._finalize_defaults()
 
     assert qs.spec.select == ['Description']
+
+
+def test_adds_primary_key_when_selected_fields_omit_it():
+    qs = QuerySet(DummyClient(), Product).select('uid_1c')
+
+    qs._finalize_defaults()
+
+    assert qs.spec.select == ['Ref_Key', 'Description']
+
+
+def test_preserves_source_select_when_cloned_query_is_executed():
+    client = Mock()
+    client.get_collection.return_value = []
+    source = QuerySet(client, Product).select('uid_1c')
+
+    source.paginate(top=1).all()
+
+    assert source.spec.select == ['Ref_Key']

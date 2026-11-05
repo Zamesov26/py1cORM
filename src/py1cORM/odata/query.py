@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from copy import deepcopy
 from dataclasses import dataclass
 from time import sleep
 from typing import TYPE_CHECKING, TypeVar
@@ -95,7 +96,7 @@ class QuerySet[T]:
 
     def clone(self) -> QuerySet[T]:
         """Создать независимую копию текущей спецификации запроса."""
-        return QuerySet(self.client, self.model, QuerySpec(**vars(self.spec)))
+        return QuerySet(self.client, self.model, deepcopy(self.spec))
 
     def select(self, *fields):
         """Ограничить ответ указанными полями модели."""
@@ -109,21 +110,24 @@ class QuerySet[T]:
         qs.spec.expand = [field_to_path(self.model, f) for f in fields]
         return qs
 
-    # TODO: проверить возможно тут не правильная логика
-    # NB: Подразумевается, что все фильтры образуют один объект(вложены друг в друга)
-    # TODO: нужно объединить их всех с помощью AND
     def filter(self, *conditions) -> QuerySet[T]:
         """Добавить выражение или готовую строку фильтра OData."""
+        serialized = []
+
         for condition in conditions:
             if isinstance(condition, Expr):
-                qs = self.clone()
-                qs.spec.filter = condition.to_odata()
-                return qs
+                serialized.append(condition.to_odata())
             elif isinstance(condition, str):
-                self.spec.filter = condition
+                serialized.append(condition)
             else:
                 raise TypeError('Unsupported filter argument')
-        return self
+
+        qs = self.clone()
+        if len(serialized) == 1:
+            qs.spec.filter = serialized[0]
+        elif serialized:
+            qs.spec.filter = f'({" and ".join(serialized)})'
+        return qs
 
     def order_by(self, *fields) -> QuerySet[T]:
         """Задать порядок результатов по полям и направлениям сортировки."""
@@ -168,8 +172,11 @@ class QuerySet[T]:
             Очередная непустая страница сущностей.
 
         Raises:
+            ValueError: Размер страницы неположительный.
             ValueError: Передана отрицательная длительность паузы.
         """
+        if batch_size <= 0:
+            raise ValueError('Batch size must be positive')
         if delay < 0:
             raise ValueError('Delay cannot be negative')
 

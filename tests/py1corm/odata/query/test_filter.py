@@ -1,3 +1,4 @@
+import pytest
 from tests.models import Product
 
 from py1cORM.odata.query import QuerySet
@@ -22,3 +23,33 @@ def test_stores_filter_unchanged_when_raw_string_is_given():
     qs._finalize_defaults()
 
     assert qs.spec.filter == "Category/Parent/Name eq 'X'"
+
+
+def test_combines_conditions_when_multiple_expressions_are_given():
+    qs = QuerySet(DummyClient(), Product).filter(
+        Product.name == 'Cup', Product.category.name == 'Tableware'
+    )
+
+    assert qs.spec.filter == ("(Description eq 'Cup' and Category/Name eq 'Tableware')")
+
+
+def test_combines_conditions_when_expression_and_raw_string_are_given():
+    qs = QuerySet(DummyClient(), Product).filter(
+        Product.name == 'Cup', 'Category_Key ne null'
+    )
+
+    assert qs.spec.filter == "(Description eq 'Cup' and Category_Key ne null)"
+
+
+def test_preserves_source_query_when_raw_filter_is_added():
+    source = QuerySet(DummyClient(), Product)
+
+    filtered = source.filter("Description eq 'Cup'")
+
+    assert source.spec.filter is None
+    assert filtered.spec.filter == "Description eq 'Cup'"
+
+
+def test_rejects_filter_when_condition_type_is_unsupported():
+    with pytest.raises(TypeError, match='Unsupported filter argument'):
+        QuerySet(DummyClient(), Product).filter(object())

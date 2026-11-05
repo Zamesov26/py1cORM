@@ -126,3 +126,11 @@ def test_rejects_iteration_when_delay_is_negative():
 
     with pytest.raises(ValueError, match='Delay cannot be negative'):
         list(qs.batched(delay=-1))
+
+
+@pytest.mark.parametrize('batch_size', [0, -1])
+def test_rejects_iteration_when_batch_size_is_not_positive(batch_size):
+    qs = QuerySet(DummyClient([]), DummyModel)
+
+    with pytest.raises(ValueError, match='Batch size must be positive'):
+        list(qs.batched(batch_size=batch_size))

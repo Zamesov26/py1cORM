@@ -43,7 +43,11 @@ def field_to_path(model, field):
 def order_to_odata(model, field):
     """Преобразовать описание сортировки в выражение ``$orderby``."""
     if isinstance(field, tuple):
+        if len(field) != 2:
+            raise ValueError('Order tuple must contain field and direction')
         name, direction = field
+        if direction not in {'asc', 'desc'}:
+            raise ValueError("Order direction must be 'asc' or 'desc'")
         path = field_to_path(model, name)
         return f'{path} {direction}'
     return field_to_path(model, field)
