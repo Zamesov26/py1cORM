@@ -1,7 +1,9 @@
 """Сериализация Python-значений в литералы фильтров OData."""
 
+from collections.abc import Callable
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Any
 from uuid import UUID
 
 
@@ -47,7 +49,7 @@ def _serialize_collection(values, field=None):
     return f'({", ".join(serialized)})'
 
 
-_TYPE_SERIALIZERS = {
+_TYPE_SERIALIZERS: dict[type, Callable[[Any], str]] = {
     type(None): _serialize_none,
     bool: _serialize_bool,
     int: _serialize_number,

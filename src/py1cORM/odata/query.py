@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass
 from time import sleep
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 from py1cORM.odata.expressions import AndExpr, BinExpr, Expr, FuncExpr
 from py1cORM.odata.fields import FieldRef
@@ -25,9 +25,9 @@ LOOKUP_MAP = {
 }
 
 
-def kwargs_to_expr(model, kwargs: dict):
+def kwargs_to_expr(model: type[ODataModel], kwargs: dict[str, object]) -> Expr:
     """Преобразовать именованные lookup-условия в выражение OData."""
-    expressions = []
+    expressions: list[Expr] = []
 
     for key, value in kwargs.items():
         parts = key.split('__')
@@ -39,10 +39,10 @@ def kwargs_to_expr(model, kwargs: dict):
         if not field:
             raise ValueError(f'Unknown field: {field_name}')
 
-        field_ref = FieldRef(model, field)
+        field_ref: FieldRef[object] = FieldRef(model, field)
 
         if lookup == 'eq':
-            expr = BinExpr(field_ref, 'eq', value)
+            expr: Expr = BinExpr(field_ref, 'eq', value)
 
         elif lookup == 'contains':
             expr = FuncExpr('contains', field_ref, value)
@@ -83,10 +83,7 @@ class QuerySpec:
     count: bool | None = None
 
 
-T = TypeVar('T', bound='ODataModel')
-
-
-class QuerySet[T]:
+class QuerySet[T: ODataModel]:
     """Построитель запросов и загрузчик сущностей указанной модели."""
 
     def __init__(self, client, model: type[T], spec: QuerySpec | None = None):
@@ -152,7 +149,7 @@ class QuerySet[T]:
                 pk_field = self.model._fields[pk_name]
                 pk_odata = pk_field.odata_name
 
-                if pk_odata not in self.spec.select:
+                if pk_odata is not None and pk_odata not in self.spec.select:
                     self.spec.select.append(pk_odata)
 
     def all(self) -> list[T]:

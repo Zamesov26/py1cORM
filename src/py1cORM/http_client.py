@@ -39,14 +39,16 @@ class Connection:
         self.headers = {
             'Accept': 'application/json',
         }
-        self._session = None
+        self._session: requests.Session | None = None
 
     def __enter__(self) -> 'Connection':
         self._session = self._create_session()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        self._session.close()
+    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
+        if self._session is not None:
+            self._session.close()
+            self._session = None
 
     def _create_session(self) -> requests.Session:
         session = requests.Session()

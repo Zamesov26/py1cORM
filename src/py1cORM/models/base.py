@@ -1,10 +1,15 @@
 """Базовая модель OData и метакласс сбора декларативных полей."""
 
-from .fields import Field
+from typing import Any, ClassVar
+
+from .fields import Field, ForeignKey
 
 
 class ODataModelMeta(type):
     """Метакласс, связывающий объявленные поля с моделью OData."""
+
+    _fields: dict[str, Field[Any]]
+    _alias_map: dict[str | None, str]
 
     def __new__(cls, name, bases, namespace):
         """Создать класс модели и собрать объявленные в нём поля."""
@@ -18,18 +23,21 @@ class ODataModelMeta(type):
 
         new_cls = super().__new__(cls, name, bases, namespace)
 
-        new_cls._fields = {}
-        new_cls._alias_map = {}
+        fields = {}
+        alias_map = {}
 
         for field_name, field in declared.items():
             annotation = annotations.get(field_name)
             field.bind(new_cls, field_name, annotation)
 
-            new_cls._fields[field_name] = field
-            new_cls._alias_map[field.alias] = field_name
+            fields[field_name] = field
+            alias_map[field.alias] = field_name
 
-            if getattr(field, 'is_foreign_key', False):
-                new_cls._alias_map[field.key_field] = field_name
+            if isinstance(field, ForeignKey):
+                alias_map[field.key_field] = field_name
+
+        new_cls._fields = fields
+        new_cls._alias_map = alias_map
 
         return new_cls
 
@@ -44,6 +52,10 @@ class ODataModelMeta(type):
 
 class ODataModel(metaclass=ODataModelMeta):
     """Базовый класс декларативных моделей сущностей OData."""
+
+    Meta: ClassVar[Any]
+    _fields: ClassVar[dict[str, Field[Any]]]
+    _alias_map: ClassVar[dict[str | None, str]]
 
     @classmethod
     def from_raw(cls, raw: dict):

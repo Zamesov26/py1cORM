@@ -1,6 +1,6 @@
 """Декларативные поля моделей и описания связей OData."""
 
-from typing import Generic, TypeVar
+from typing import Any, TypeVar
 
 from py1cORM.odata.fields import FieldRef
 
@@ -30,9 +30,9 @@ class Field[T]:
         self.auto_expand = auto_expand
         self.default = default
 
-        self.model = None
-        self.attr_name = None
-        self.annotation = None
+        self.model: type | None = None
+        self.attr_name: str | None = None
+        self.annotation: Any = None
 
     def bind(self, model, attr_name: str, annotation):
         """Связать поле с моделью, Python-именем и аннотацией типа."""
@@ -45,7 +45,7 @@ class Field[T]:
 
         return self
 
-    def ref(self) -> Generic[T]:
+    def ref(self) -> FieldRef[T]:
         """Вернуть ссылку на поле для построения OData-выражений."""
         return FieldRef(self.model, self)
 
@@ -93,7 +93,7 @@ class ForeignKey(Field):
     is_relation = True
     is_foreign_key = True
 
-    def __init__(self, *, model: type, key_field: str, **kwargs):
+    def __init__(self, *, model: Any, key_field: str, **kwargs):
         super().__init__(**kwargs)
         self.related_model = model
         self.key_field = key_field

@@ -36,7 +36,7 @@ class ODataConnection:
         """Загрузить коллекцию сущностей с параметрами запроса из спецификации."""
         url = f'{self.base_url}/{entity_name}'
 
-        params = {}
+        params: dict[str, str | int] = {}
 
         if spec.select:
             params['$select'] = ','.join(spec.select)
