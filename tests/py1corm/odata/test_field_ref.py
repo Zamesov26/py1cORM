@@ -7,6 +7,7 @@ from py1cORM.odata.query import kwargs_to_expr
 
 class Employee(ODataModel):
     name: Mapped[str] = Field()
+    active: Mapped[bool] = Field()
 
 
 class Department(ODataModel):
@@ -33,6 +34,18 @@ def test_builds_endswith_function_when_method_is_called():
     expr = Employee.name.endswith('Ivan')
 
     assert expr.to_odata() == "endswith(name, 'Ivan')"
+
+
+def test_builds_eq_expression_when_method_is_called():
+    expr = Employee.active.eq(False)
+
+    assert expr.to_odata() == 'active eq false'
+
+
+def test_builds_ne_expression_when_method_is_called():
+    expr = Employee.active.ne(True)
+
+    assert expr.to_odata() == 'active ne true'
 
 
 def test_builds_startswith_function_when_lookup_is_given():
