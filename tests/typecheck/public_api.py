@@ -39,6 +39,7 @@ class Product(ODataModel):
 
     uid: Mapped[UUID] = Field(alias='Ref_Key')
     name: Mapped[str] = Field(alias='Description')
+    is_deleted: Mapped[bool] = Field(alias='DeletionMark')
     category_id: Mapped[UUID | None] = Field(alias='Category_Key')
     category: Mapped[Category | None] = Relationship(
         model=Category,
@@ -65,6 +66,8 @@ assert_type(
     PathRef[str],
 )
 assert_type(Product.uid == UUID(int=1), BinExpr)
+assert_type(Product.is_deleted.eq(False), BinExpr)
+assert_type(Product.is_deleted.ne(True), BinExpr)
 
 if TYPE_CHECKING:
     # Поле другой модели должно отклоняться статическим анализатором.

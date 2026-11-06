@@ -72,11 +72,19 @@ class FieldRef[ModelT, T]:
             )
         return PathRef(next_ref.model, self.fields + next_ref.fields)
 
-    def __eq__(self, other: object) -> BinExpr:  # type: ignore[override]
+    def eq(self, other: object) -> BinExpr:
+        """Построить сравнение OData оператором ``eq``."""
         return BinExpr(self, 'eq', other)
 
-    def __ne__(self, other: object) -> BinExpr:  # type: ignore[override]
+    def ne(self, other: object) -> BinExpr:
+        """Построить сравнение OData оператором ``ne``."""
         return BinExpr(self, 'ne', other)
+
+    def __eq__(self, other: object) -> BinExpr:  # type: ignore[override]
+        return self.eq(other)
+
+    def __ne__(self, other: object) -> BinExpr:  # type: ignore[override]
+        return self.ne(other)
 
     def __gt__(self, other: object) -> BinExpr:
         return BinExpr(self, 'gt', other)

@@ -109,7 +109,7 @@ query = Nomenclature.using(connection)
 
 items = (
     query.select(Nomenclature.name, Nomenclature.article)
-    .filter(Nomenclature.is_deleted == False)  # noqa: E712
+    .filter(Nomenclature.is_deleted.eq(False))
     .order_by((Nomenclature.name, 'asc'))
     .paginate(top=20)
     .all()
@@ -137,7 +137,8 @@ query.select(Nomenclature.name, 'article').all()
 
 ### Фильтрация
 
-Поддерживаются `==`, `!=`, `>`, `>=`, `<`, `<=` и логические группы `AND`/`OR`:
+Поддерживаются `==`, `!=`, `>`, `>=`, `<`, `<=` и логические группы `AND`/`OR`.
+Для явной записи операторов OData доступны методы `eq()` и `ne()`:
 
 ```python
 from py1cORM.odata.expressions import AND, OR
@@ -145,7 +146,7 @@ from py1cORM.odata.expressions import AND, OR
 
 query.filter(
     AND(
-        Nomenclature.is_deleted == False,  # noqa: E712
+        Nomenclature.is_deleted.eq(False),
         OR(
             Nomenclature.name.startswith('Стакан'),
             Nomenclature.article == 'A-001',
